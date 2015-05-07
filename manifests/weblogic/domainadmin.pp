@@ -1,4 +1,14 @@
-class profile::weblogic::domainadmin {
+class profile::weblogic::domainadmin (
+	$version = '1036',
+	$middleware_home,
+	$weblogic_home,
+	$domains_defaults = {},
+	$nodemanager_defaults = {},
+	$startwls_defaults = {},
+	$userconfig_defaults = {},
+	$security_defaults = {},
+	$basic_config_defaults = {},
+) {
   $wls_os_user = hiera('wls_os_user')
   $wls_os_group = hiera('wls_os_group')
   $wls_domain = $::wls_domain
@@ -13,13 +23,55 @@ class profile::weblogic::domainadmin {
     osDomainPathParam => "${wls_domains_path}/${wls_domain}",
   }
 
-  include weblogic::services::domains
-  include weblogic::services::nodemanager
-  include weblogic::services::startwls
-  include weblogic::services::userconfig
+  class { '::weblogic::services::domains':
+    default_params        => $domains_defaults,
+    file_domain_libs      => hiera('file_domain_libs', {}),
+    domain_instances      => hiera('domain_instances', {}),
+    wls_setting_instances => hiera('wls_setting_instances', {}),
+  }
 
-  include weblogic::services::security
-  include weblogic::services::basic_config
+  class { '::weblogic::services::nodemanager': 
+    default_params                => $nodemanager_defaults,
+    nodemanager_instances         => hiera('nodemanager_instances', {}),
+    version                       => hiera('wls_version'),
+    wls_weblogic_home_dir         => hiera('wls_weblogic_home_dir'),
+    wls_os_user                   => hiera('wls_os_user'),
+    wls_jsse_enabled              => hiera('wls_jsse_enabled', false),
+    wls_custom_trust              => hiera('wls_custom_trust', false),
+    wls_trust_keystore_file       => hiera('wls_trust_keystore_file', undef),
+    wls_trust_keystore_passphrase => hiera('wls_trust_keystore_passphrase', undef),
+  }
+
+  class { '::weblogic::services::startwls':
+    default_params    => $startwls_defaults,
+    control_instances => hiera('control_instances', {}),
+  }
+  
+  class { '::weblogic::services::userconfig':
+    default_params       => $userconfig_defaults,
+    userconfig_instances => hiera('userconfig_instances', {}),
+  }
+
+  class { '::weblogic::services::security':
+    default_params                    => $security_defaults,
+    user_instances                    => hiera('user_instances', {}),
+    group_instances                   => hiera('group_instances', {}),
+    authentication_provider_instances => hiera('authentication_provider_instances', {}),
+  }
+
+  class { '::weblogic::services::basic_config':
+    default_params                   => $basic_config_defaults,
+    wls_domain_instances             => hiera('wls_domain_instances', {}),
+    wls_adminserver_instances_domain => hiera('wls_adminserver_instances_domain', {}),
+    machines_instances               => hiera('machines_instances', {}),
+    server_instances                 => hiera('server_instances'),
+    wls_adminserver_instances_server => hiera('wls_adminserver_instances_server', {}),
+    server_channel_instances         => hiera('server_channel_instances', {}),
+    cluster_instances                => hiera('cluster_instances', {}),
+    coherence_cluster_instances      => hiera('coherence_cluster_instances', {}),
+    server_template_instances        => hiera('server_template_instances', {}),
+    mail_session_instances           => hiera('mail_session_instances', {}),
+  }
 
   Class['orautils'] ->
   Class['weblogic::services::domains'] ->

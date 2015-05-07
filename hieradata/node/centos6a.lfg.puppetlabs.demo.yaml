@@ -1,5 +1,5 @@
 ---
-
+# centos6a / admin node
 logoutput:                &logoutput                true
 orawls::weblogic::log_output:   *logoutput
 
@@ -76,7 +76,7 @@ wls_setting_instances:
   'default':
     user:               *wls_os_user
     weblogic_home_dir:  *wls_weblogic_home_dir
-    connect_url:        "t3://%{::ipaddress_eth1}:7001"
+    connect_url:        "t3://%{::fqdn}:7001"
     weblogic_user:      *wls_weblogic_user
     weblogic_password:  *domain_wls_password
 #  'D02N02O02Setting':
