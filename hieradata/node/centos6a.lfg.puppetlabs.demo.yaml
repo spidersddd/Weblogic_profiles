@@ -88,7 +88,8 @@ wls_setting_instances:
 #    # post_classpath:     "%{hiera('wls_oracle_base_home_dir')}/user_projects/domains/D02N02O02/lib/idmsSecurityProvider-3.26-SNAPSHOT.jar"
 
 # FMW installation on top of WebLogic 10.3.6
-fmw_installations:
+#fmw_installations:
+profile::weblogic::base::addons:
    'soaPS6':
      fmw_product:             "soa"
      fmw_file1:               "ofm_soa_generic_11.1.1.7.0_disk1_1of2.zip"
@@ -107,16 +108,18 @@ fmw_installations:
      remote_file:             false
 
 #opatch_instances:
-#   '17584181':
+#profile::weblogic::base::opatch:
+#   '18679977':
 #      ensure:                   "present"
-#      #oracle_product_home_dir:  "/vagrant/oracle/Installers_OVD_OUD/ovd-patches/"
-#      patch_id:                 '17391582'
-#      patch_file:               'p17391582_111170_Generic.zip'
+##      #oracle_product_home_dir:  "/vagrant/oracle/Installers_OVD_OUD/ovd-patches/"
+#      patch_id:                 '18679977'
+#      patch_file:               'p18679977_111221_Generic.zip'
 #      remote_file:              false
+
 #      jdk_home_dir:             "%{hiera('wls_jdk_home_dir')}"
 #      os_group:                 "%{hiera('dft_wls_os_group')}"
 #      os_user:                  "%{hiera('dft_wls_os_user')}"
-#      download_dir:             "/vagrant/oracle/Installers_OVD_OUD/ovd-patches/"
+#      download_dir:             "/vagrant/oracle"
 
 # pack domains
 pack_domain_instances:

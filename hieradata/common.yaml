@@ -16,7 +16,7 @@ dft_wls_log_output:           'true'
 dft_wls_log_dir:              "/opt/log/weblogic"
 
 wls_os_user:                  &wls_os_user              "%{hiera('dft_wls_os_user')}"
-wls_os_user_home:             &wls_os_user_home         "/home/%{hiera('dft_wls_os_user')"
+wls_os_user_home:             &wls_os_user_home         "/home/%{hiera('dft_wls_os_user')}"
 
 wls_version:                  &wls_version              1036
 wls_domains_dir:              &wls_domains_dir          "%{hiera('dft_wls_domains_path')}"
@@ -26,7 +26,7 @@ wls_ora_inventory:            &wls_ora_inventory        "%{hiera('dft_wls_oracle
 wls_weblogic_home_dir:        &wls_weblogic_home_dir    "%{hiera('dft_wls_weblogic_home_dir')}"
 wls_middleware_home_dir:      &wls_middleware_home_dir  "%{hiera('dft_wls_middleware_home_dir')}"
 wls_jdk_home_dir:             &wls_jdk_home_dir         "/usr/java/latest"
-wls_download_dir:             &wls_download_dir         "/vagrant/oracle"
+wls_download_dir:             &wls_download_dir         "/tmp/oracle"
 wls_weblogic_user:            &wls_weblogic_user        "%{hiera('dft_wls_weblogic_user')}"
 domain_wls_password:          &domain_wls_password      "%{hiera('dft_wls_weblogic_password')}"
 wls_weblogic_password:        &domain_wls_password      "%{hiera('dft_wls_weblogic_password')}"
@@ -78,13 +78,13 @@ hosts:
 wls_jdk_install:          &wls_jdk_install          false
 wls_jdk_package:          &wls_jdk_package          'UnlimitedJCEPolicyJDK7.zip'
 wls_filename:             &wls_filename             "wls1036_generic.jar"
-wls_download_dir:         &wls_download_dir         "/vagrant/oracle"
+wls_download_dir:         &wls_download_dir         "/tmp/oracle"
 #wls_filename:             &wls_filename             "fmw_12.1.3.0.0_wls.jar"
 
 # global OS vars
 wls_os_user:              &wls_os_user              "%{hiera('dft_wls_os_user')}"
 wls_os_group:             &wls_os_group             "%{hiera('dft_wls_os_group')}"
-wls_os_user_home:         &wls_os_user_home         "/home/%{hiera('wls_os_user')"
+wls_os_user_home:         &wls_os_user_home         "/home/%{hiera('wls_os_user')}"
 wls_source:               &wls_source               "/vagrant/oracle"
 wls_jdk_home_dir:         &wls_jdk_home_dir         "/usr/java/latest"
 #wls_log_dir:              &wls_log_dir              "%{hiera('wls_oracle_base_home_dir')}/log/weblogic"
