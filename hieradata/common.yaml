@@ -1,38 +1,34 @@
 ---
 
-#weblogic::provision::source: '/vagrant/oracle'
-#orautils::oraGroupParam:     "%{hiera('dft_wls_os_group')}"
-#orautils::oraUserParam:     "%{hiera('dft_wls_os_user')}"
+dft_wls_os_user:                            'webadmin'
+dft_wls_os_group:                           'webadmns'
+dft_wls_weblogic_user:                      'weblogic'
+dft_wls_weblogic_password:                  'weblogic1'
+dft_wls_oracle_base_home_dir:               "/opt/was/oracle"
+dft_wls_middleware_home_dir:                "%{hiera('profile::weblogic::oracle_base_home_dir')}/middleware/%{hiera('profile::weblogic::version')}"
+dft_wls_weblogic_home_dir:                  "%{hiera('profile::weblogic::middleware_home_dir')}/wlserver_10.3"
+dft_wls_domains_path:                       "%{hiera('profile::weblogic::middleware_home_dir')}/user_projects/domains"
+dft_wls_log_output:                         'true'
+dft_wls_log_dir:                            "/opt/log/weblogic"
 
-dft_wls_os_user:              'webadmin'
-dft_wls_os_group:             'webadmns'
-dft_wls_weblogic_user:        'weblogic'
-dft_wls_weblogic_password:    'weblogic1'
-dft_wls_oracle_base_home_dir: "/opt/was/oracle"
-dft_wls_middleware_home_dir:  "%{hiera('wls_oracle_base_home_dir')}/middleware/%{hiera('wls_version')}"
-dft_wls_weblogic_home_dir:    "%{hiera('wls_middleware_home_dir')}/wlserver_10.3"
-dft_wls_domains_path:         "%{hiera('wls_middleware_home_dir')}/user_projects/domains"
-dft_wls_log_output:           'true'
-dft_wls_log_dir:              "/opt/log/weblogic"
+profile::weblogic::os_user:                  "%{hiera('dft_wls_os_user')}"
+profile::weblogic::os_user_home:             "/home/%{hiera('dft_wls_os_user')}"
 
-wls_os_user:                  &wls_os_user              "%{hiera('dft_wls_os_user')}"
-wls_os_user_home:             &wls_os_user_home         "/home/%{hiera('dft_wls_os_user')}"
+profile::weblogic::version:                  1036
+profile::weblogic::domains_dir:              "%{hiera('dft_wls_domains_path')}"
+profile::weblogic::oracle_base_home_dir:     "%{hiera('dft_wls_oracle_base_home_dir')}"
+profile::weblogic::apps_dir:                 "%{hiera('dft_wls_oracle_base_home_dir')}/applications"
+profile::weblogic::ora_inventory:            "%{hiera('dft_wls_oracle_base_home_dir')}/oraInventory"
+profile::weblogic::weblogic_home_dir:        "%{hiera('dft_wls_weblogic_home_dir')}"
+profile::weblogic::middleware_home_dir:      "%{hiera('dft_wls_middleware_home_dir')}"
+profile::weblogic::jdk_home_dir:             "/usr/java/latest"
+profile::weblogic::download_dir:             "/tmp/oracle"
+profile::weblogic::weblogic_user:            "%{hiera('dft_wls_weblogic_user')}"
+domain_profile::weblogic::password:          "%{hiera('dft_wls_weblogic_password')}"
+profile::weblogic::weblogic_password:        "%{hiera('dft_wls_weblogic_password')}"
+profile::weblogic::log_dir:                  "%{hiera('dft_wls_log_dir')}"
 
-wls_version:                  &wls_version              1036
-wls_domains_dir:              &wls_domains_dir          "%{hiera('dft_wls_domains_path')}"
-wls_oracle_base_home_dir:     &wls_oracle_base_home_dir "%{hiera('dft_wls_oracle_base_home_dir')}"
-wls_apps_dir:                 &wls_apps_dir             "%{hiera('dft_wls_oracle_base_home_dir')}/applications"
-wls_ora_inventory:            &wls_ora_inventory        "%{hiera('dft_wls_oracle_base_home_dir')}/oraInventory"
-wls_weblogic_home_dir:        &wls_weblogic_home_dir    "%{hiera('dft_wls_weblogic_home_dir')}"
-wls_middleware_home_dir:      &wls_middleware_home_dir  "%{hiera('dft_wls_middleware_home_dir')}"
-wls_jdk_home_dir:             &wls_jdk_home_dir         "/usr/java/latest"
-wls_download_dir:             &wls_download_dir         "/tmp/oracle"
-wls_weblogic_user:            &wls_weblogic_user        "%{hiera('dft_wls_weblogic_user')}"
-domain_wls_password:          &domain_wls_password      "%{hiera('dft_wls_weblogic_password')}"
-wls_weblogic_password:        &domain_wls_password      "%{hiera('dft_wls_weblogic_password')}"
-wls_log_dir:                  &wls_log_dir              "%{hiera('dft_wls_log_dir')}"
-
-# this will use default as wls_setting identifier
+# this will use default as profile::weblogic::setting identifier
 authentication_provider_instances:
   'DefaultAuthenticator':
     ensure:             'present'
@@ -43,77 +39,50 @@ authentication_provider_instances:
     attributes:         'DigestReplayDetectionEnabled;UseDefaultUserNameMapper;DefaultUserNameMapperAttributeType;ActiveTypes'
     attributesvalues:   '1;1;CN;AuthenticatedUser::X.509'
 
-adminserver_address:        &adminserver_address        "172.22.5.5"
-node1_address:              &node1_address              "172.22.5.10"
-node2_address:              &node2_address              "172.22.5.11"
+adminserver_address:    "172.22.5.5"
+node1_address:          "172.22.5.10"
+node2_address:          "172.22.5.11"
 
-domain_adminserver_address: &domain_adminserver_address "%{hiera('adminserver_address')}"
-domain_adminserver_port:    &domain_adminserver_port    "7001"
-domain_node1_address:       &domain_node1_address       "%{hiera('node1_address')}"
-domain_node2_address:       &domain_node2_address       "%{hiera('node2_address')}"
+domain_adminserver_address: "%{hiera('adminserver_address')}"
+domain_adminserver_port:    "7001"
+domain_node1_address:       "%{hiera('node1_address')}"
+domain_node2_address:       "%{hiera('node2_address')}"
 
 hosts:
   'localhost':
     ip:                "127.0.0.1"
     host_aliases:      'localhost.localdomain,localhost4,localhost4.localdomain4'
   'admin.puppetlabs.vm':
-    ip:                *domain_adminserver_address
+    ip:                "%{hiera('adminserver_address')}"
     host_aliases:      'admin'
   'node1.puppetlabs.vm':
-    ip:                *domain_node1_address
+    ip:                "%{hiera('node1_address')}"
     host_aliases:      'node1'
   'node2.puppetlabs.vm':
-    ip:                *domain_node2_address
+    ip:                "%{hiera('node2_address')}"
     host_aliases:      'node2'
 
 
 # global WebLogic vars
-#wls_oracle_base_home_dir: &wls_oracle_base_home_dir "/opt/was/oracle/%{hiera('wls_version')}"
-#wls_weblogic_user:        &wls_weblogic_user        "weblogic"
-#wls_weblogic_password:    &wls_weblogic_password    "weblogic1"
-#wls_os_user:              &wls_os_user              "%{hiera('dft_wls_os_user')}"
-#wls_os_group:             &wls_os_group             "%{hiera('dft_wls_os_group')}"
-#wls_weblogic_home_dir:    &wls_weblogic_home_dir    "%{hiera('dft_wls_weblogic_home_dir')}"
-#wls_middleware_home_dir:  &wls_middleware_home_dir  "%{hiera('dft_wls_middleware_home_dir')}"
-wls_jdk_install:          &wls_jdk_install          false
-wls_jdk_package:          &wls_jdk_package          'UnlimitedJCEPolicyJDK7.zip'
-wls_filename:             &wls_filename             "wls1036_generic.jar"
-wls_download_dir:         &wls_download_dir         "/tmp/oracle"
-#wls_filename:             &wls_filename             "fmw_12.1.3.0.0_wls.jar"
+profile::weblogic::jdk_install:          false
+profile::weblogic::jdk_package:          'UnlimitedJCEPolicyJDK7.zip'
+profile::weblogic::filename:             "wls1036_generic.jar"
+profile::weblogic::download_dir:         "/tmp/oracle"
 
 # global OS vars
-wls_os_user:              &wls_os_user              "%{hiera('dft_wls_os_user')}"
-wls_os_group:             &wls_os_group             "%{hiera('dft_wls_os_group')}"
-wls_os_user_home:         &wls_os_user_home         "/home/%{hiera('wls_os_user')}"
-wls_source:               &wls_source               "/vagrant/oracle"
-wls_jdk_home_dir:         &wls_jdk_home_dir         "/usr/java/latest"
-#wls_log_dir:              &wls_log_dir              "%{hiera('wls_oracle_base_home_dir')}/log/weblogic"
-wls_log_dir:              &wls_log_dir              "/opt/log/weblogic"
+profile::weblogic::os_user:              "%{hiera('dft_wls_os_user')}"
+profile::weblogic::os_group:             "%{hiera('dft_wls_os_group')}"
+profile::weblogic::os_user_home:         "/home/%{hiera('wls_os_user')}"
+profile::weblogic::source:               "/vagrant/oracle"
+profile::weblogic::jdk_home_dir:         "/usr/java/latest"
+profile::weblogic::log_dir:              "/opt/log/weblogic"
 
-wls_apps_dir:             &wls_apps_dir             "%{hiera('wls_oracle_base_home_dir')}/applications"
+profile::weblogic::apps_dir:             "%{hiera('wls_oracle_base_home_dir')}/applications"
 
-wls_ora_inventory:        &wls_ora_inventory        "%{hiera('wls_oracle_base_home_dir')}/oraInventory"
-wls_jsse_enabled:         &wls_jsse_enabled         false
+profile::weblogic::ora_inventory:        "%{hiera('wls_oracle_base_home_dir')}/oraInventory"
+profile::weblogic::jsse_enabled:         false
 
-wls_ora_inventory_dir:    *wls_ora_inventory
-#WebLogic installation variables
-#weblogic::provision::version:              *wls_version
-#weblogic::provision::filename:             "wls1036_generic.jar"
-#weblogic::provision::middleware_home_dir:  *wls_middleware_home_dir
-#weblogic::provision::log_output:           false
-
-# hiera default anchors
-#weblogic::provision::jdk_home_dir:         *wls_jdk_home_dir
-#weblogic::provision::oracle_base_home_dir: *wls_oracle_base_home_dir
-#weblogic::provision::os_user:              *wls_os_user
-#weblogic::provision::os_group:             *wls_os_group
-#weblogic::provision::download_dir:         *wls_download_dir
-#weblogic::provision::source:               *wls_source
-#weblogic::provision::remote_file:          false
-#weblogic::provision::wls_domains_dir:      *wls_domains_dir
-#weblogic::provision::wls_apps_dir:         *wls_apps_dir
-
-#weblogic::utils::orainst::wls_ora_inventory_dir: '/opt/was/oracle/oraInventory'
+profile::weblogic::ora_inventory_dir:    "%{hiera('wls_oracle_base_home_dir')}/oraInventory"
 
 # patches for WebLogic 10.3.6
 bsu_instances:
@@ -129,31 +98,4 @@ bsu_instances:
   #   patch_file:              'p18040640_1036_Generic.zip'
   #   log_output:              true
   #   remote_file:             false
-
-# handy WebLogic scripts in /opt/scripts/wls
-#orautils::osOracleHomeParam:      *wls_oracle_base_home_dir
-#orautils::oraInventoryParam:      *wls_ora_inventory
-#orautils::osDomainTypeParam:      "admin"
-#orautils::osLogFolderParam:       *wls_log_dir
-#orautils::osDownloadFolderParam:  *wls_download_dir
-#orautils::osMdwHomeParam:         *wls_middleware_home_dir
-#orautils::osWlHomeParam:          *wls_weblogic_home_dir
-#orautils::oraUserParam:           *wls_os_user
-
-#orautils::nodeMgrPathParam:       "%{hiera('dft_wls_weblogic_home_dir')}/server/bin"
-#orautils::nodeMgrAddressParam:    *domain_adminserver_address
-#orautils::nodeMgrPortParam:       5556
-
-#orautils::wlsUserParam:           *wls_weblogic_user
-#orautils::jsseEnabledParam:       *wls_jsse_enabled
-
-#weblogic::os::install_jdk:        *wls_jdk_install
-#weblogic::os::jdk_package:        *wls_jdk_package
-#weblogic::os::source:             *wls_source
-
-#weblogic::utils::user::user_name: *wls_weblogic_user
-#weblogic::services::nodemanager::version:                *wls_version
-#weblogic::services::nodemanager::wls_weblogic_home_dir:  *wls_weblogic_home_dir
-#weblogic::services::nodemanager::wls_os_user:            *wls_os_user
-#weblogic::services::nodemanager::wls_os_group:           *wls_os_group
 
