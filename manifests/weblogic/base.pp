@@ -26,27 +26,27 @@ class profile::weblogic::base (
 
   contain profile::weblogic::java
 
-  class { 'weblogic::utils::user':
+  class { '::weblogic::utils::user':
     user_name     => $wls_os_user,
     user_group    => $wls_os_group,
     user_home     => "/home/$wls_os_user",
     user_password => '$1$v4K9E8Wj$gZIHJ5JtQL5ZGZXeqSSsd0',
   }
 
-  class { 'weblogic::os':
+  class { '::weblogic::os':
     host_instances => {},
     install_jdk    => false,
     java_homes     => '/usr/java/latest',
   }
 
-  class { 'weblogic::urandomfix': }
+  class { '::weblogic::urandomfix': }
 
-  class { 'weblogic::ssh':
+  class { '::weblogic::ssh':
     os_user  => "$wls_os_user",
     os_group => "$wls_os_group",
   }
   
-  class { 'weblogic::provision': 
+  class { '::weblogic::provision': 
     version               =>  '1036',
     filename              =>  'wls1036_generic.jar',
     export_dir            =>  '/tmp/oracle',
@@ -56,12 +56,12 @@ class profile::weblogic::base (
     
   include weblogic::services::bsu
 
-  class { 'weblogic::services::fmw':
+  class { '::weblogic::services::fmw':
     default_params => $default,
     fmw_installations => $fmw_plugins,
   }   
 
-  class { 'weblogic::services::opatch':
+  class { '::weblogic::services::opatch':
     default_params   => $default,
     opatch_instances => $opatch, 
   }
