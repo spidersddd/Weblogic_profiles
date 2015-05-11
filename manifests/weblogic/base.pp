@@ -2,6 +2,7 @@ class profile::weblogic::base (
   $wls_os_user           = hiera('wls_os_user', 'webadmin'),
   $wls_os_group          = hiera('wls_os_group', 'webadmns'),
   $wls_domain            = $::wls_domain,
+	$wls_domain_path       = hiera('dft_wls_domains_path'),
   $weblogic_home_dir     = hiera('wls_weblogic_home_dir', '/opt/was/oracle//middleware/wlserver_10.3/'),
   $middleware_home_dir   = hiera('wls_middleware_home_dir', '/opt/was/oracle/middleware'),  
   $oracle_base_home_dir  = hiera('wls_oracle_base_home_dir', '/opt/was/oracle'), 
@@ -22,6 +23,15 @@ class profile::weblogic::base (
     os_group             => "$wls_os_group",
     download_dir         => "$download_dir",
     source               => "$source",
+  }
+  
+  class { 'orautils':
+    osMdwHomeParam    => hiera('wls_middleware_home_dir'),
+    osWlHomeParam     => hiera('wls_weblogic_home_dir'),
+    oraUserParam      => $wls_os_user,
+    oraGroupParam     => $wls_os_group,
+    osDomainParam     => $wls_domain,
+    osDomainPathParam => "${wls_domains_path}/${wls_domain}",
   }
 
   contain profile::weblogic::java

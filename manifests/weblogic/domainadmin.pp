@@ -33,14 +33,6 @@ class profile::weblogic::domainadmin (
 	$basic_config_defaults = {},
 ) {
 
-  class { 'orautils':
-    osMdwHomeParam    => hiera('wls_middleware_home_dir'),
-    osWlHomeParam     => hiera('wls_weblogic_home_dir'),
-    oraUserParam      => $os_user,
-    oraGroupParam     => $os_group,
-    osDomainParam     => $wls_domain,
-    osDomainPathParam => "${wls_domains_path}/${wls_domain}",
-  }
 
   class { '::weblogic::services::domains':
     default_params        => $domains_defaults,
