@@ -1,10 +1,12 @@
 ---
-# centos6a / admin node
+adminserver_address:    "172.22.5.5"
+node1_address:          "172.22.5.10"
+node2_address:          "172.22.5.11"
+
 logoutput:                &logoutput                true
 orawls::weblogic::log_output:   *logoutput
 
 wls_os_user:              &wls_os_user              "%{hiera('dft_wls_os_user')}"
-wls_os_group:             &wls_os_group             "%{hiera('dft_wls_os_group')}"
 wls_weblogic_user:        &wls_weblogic_user        "%{hiera('dft_wls_weblogic_user')}"
 wls_weblogic_home_dir:    &wls_weblogic_home_dir    "%{hiera('dft_wls_weblogic_home_dir')}"
 wls_middleware_home_dir:  &wls_middleware_home_dir  "%{hiera('dft_wls_middleware_home_dir')}"
@@ -77,7 +79,7 @@ wls_setting_instances:
   'default':
     user:               *wls_os_user
     weblogic_home_dir:  *wls_weblogic_home_dir
-    connect_url:        "t3://%{::fqdn}:7001"
+    connect_url:        "t3://%{::ipaddress_eth1}:7001"
     weblogic_user:      *wls_weblogic_user
     weblogic_password:  *domain_wls_password
 #  'D02N02O02Setting':
@@ -91,20 +93,25 @@ wls_setting_instances:
 # FMW installation on top of WebLogic 10.3.6
 #fmw_installations:
 profile::weblogic::base::addons:
-   'soaPS6':
+   'soaPS7':
      fmw_product:             "soa"
      fmw_file1:               "ofm_soa_generic_11.1.1.7.0_disk1_1of2.zip"
      fmw_file2:               "ofm_soa_generic_11.1.1.7.0_disk1_2of2.zip"
      log_output:              true
      remote_file:             false
-   'webTierPS6':
+   'webTierPS7':
      fmw_product:             "web"
      fmw_file1:               "ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip"
      log_output:              true
      remote_file:             false
-   'osbPS6':
+   'osbPS7':
      fmw_product:             "osb"
      fmw_file1:               "ofm_osb_generic_11.1.1.7.0_disk1_1of1.zip"
+     log_output:              true
+     remote_file:             false
+   'oudPS5':
+     fmw_product:             'oud'
+     fmw_file1:               'ofm_oud_generic_11.1.1.5.0_disk1_1of1.zip'
      log_output:              true
      remote_file:             false
 
