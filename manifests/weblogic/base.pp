@@ -76,17 +76,49 @@ class profile::weblogic::base (
     osDomainPathParam => "${domains_dir}/${wls_domain}",
   }
 #
-  class { '::weblogic::services::opatch':
-    default_params   => $default,
-    opatch_instances => $opatch, 
+#  class { '::weblogic::services::opatch':
+#    default_params   => $default,
+#    opatch_instances => $opatch, 
+#  }
+
+# We don't have opatch_instances in yaml, so no need to declar
+#weblogic::opatch { 
+#}
+
+
+#  class { '::weblogic::services::fmw':
+#    default_params => $default,
+#    fmw_installations => $fmw_plugins,
+#  }   
+
+  weblogic::fmw { 'soaPS7':
+     fmw_product => "soa",
+     fmw_file1   => "ofm_soa_generic_11.1.1.7.0_disk1_1of2.zip",
+     fmw_file2   => "ofm_soa_generic_11.1.1.7.0_disk1_2of2.zip",
+     log_output  => true,
+     remote_file => false,
   }
-#
-  class { '::weblogic::services::fmw':
-    default_params => $default,
-    fmw_installations => $fmw_plugins,
-  }   
-#
-#
+  weblogic::fmw { 'webTierPS7':
+     fmw_product => "web",
+     fmw_file1   => "ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip",
+     log_output  => true,
+     remote_file => false,
+   }
+  weblogic::fmw { 'osbPS7':
+     fmw_product => "osb",
+     fmw_file1   => "ofm_osb_generic_11.1.1.7.0_disk1_1of1.zip",
+     log_output  => true,
+     remote_file => false,
+   }
+  weblogic::fmw { 'oudPS5':
+     fmw_product => 'oud',
+     fmw_file1   => 'ofm_oud_generic_11.1.1.5.0_disk1_1of1.zip',
+     log_output  => true,
+     remote_file => false,
+  }
+
+
+
   Class['profile::weblogic::java'] ->
   Class['weblogic::utils::user'] ->
   Class['weblogic::os'] ->
