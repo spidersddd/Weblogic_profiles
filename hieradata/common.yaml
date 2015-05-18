@@ -39,7 +39,7 @@ authentication_provider_instances:
     attributes:         'DigestReplayDetectionEnabled;UseDefaultUserNameMapper;DefaultUserNameMapperAttributeType;ActiveTypes'
     attributesvalues:   '1;1;CN;AuthenticatedUser::X.509'
 
-adminserver_address:    "172.22.5.5"
+adminserver_address:    "centos6a.lfg.puppetlabs.demo"
 node1_address:          "172.22.5.10"
 node2_address:          "172.22.5.11"
 
@@ -52,7 +52,7 @@ hosts:
   'localhost':
     ip:                "127.0.0.1"
     host_aliases:      'localhost.localdomain,localhost4,localhost4.localdomain4'
-  'admin.puppetlabs.vm':
+  'centos6a.lfg.puppetlabs.demo':
     ip:                "%{hiera('adminserver_address')}"
     host_aliases:      'admin'
   'node1.puppetlabs.vm':
