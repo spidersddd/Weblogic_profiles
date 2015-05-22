@@ -4,31 +4,35 @@ node1_address:          "172.22.5.10"
 node2_address:          "172.22.5.11"
 
 logoutput:                &logoutput                true
-orawls::weblogic::log_output:   *logoutput
+#orawls::weblogic::log_output:   *logoutput
 
-wls_os_user:              &wls_os_user              "%{hiera('dft_wls_os_user')}"
-wls_weblogic_user:        &wls_weblogic_user        "%{hiera('dft_wls_weblogic_user')}"
+wls_version:                                        '1036'
+wls_os_user:              &wls_os_user              "webadmin"
+wls_os_group:             &wls_os_group             "webadmns"
+wls_weblogic_user:        &wls_weblogic_user        "weblogic"
 wls_weblogic_home_dir:    &wls_weblogic_home_dir    "%{hiera('dft_wls_weblogic_home_dir')}"
 wls_middleware_home_dir:  &wls_middleware_home_dir  "%{hiera('dft_wls_middleware_home_dir')}"
 wls_domains_path:         &wls_domains_path         "%{hiera('dft_wls_domains_path')}"
 
-weblogic::provision::source: '/vagrant/oracle'
+#profile::weblogic::source: '/vagrant/oracle'
 
 # when you have just one domain on a server
 domain_name:                &domain_name                "%{::wls_domain}"
 domain_adminserver:         &domain_adminserver         "AdminServer"
 domain_adminserver_address: &domain_adminserver_address "%{hiera('adminserver_address')}"
 domain_wls_password:        &domain_wls_password        "%{hiera('dft_wls_weblogic_password')}"
+domain_nodemanager_port:    '5556'
 
-grins_domain_adminserver_address: &grins_domain_adminserver_address "AdminServer"
+#adminserver_address: &adminserver_address "AdminServer"
+adminserver_address: &adminserver_address  "172.22.5.5"
 
 domain_node1_address: &domain_node1_address "%{hiera('node1_address')}"
 domain_node2_address: &domain_node2_address "%{hiera('node2_address')}"
 
 # custom trust
-orautils::customTrust:             true
-orautils::trustKeystoreFile:       '/vagrant/oracle/truststore.jks'
-orautils::trustKeystorePassphrase: 'welcome'
+#orautils::customTrust:             true
+#orautils::trustKeystoreFile:       '/vagrant/oracle/truststore.jks'
+#orautils::trustKeystorePassphrase: 'welcome'
 
 # used by nodemanager, control and domain creation
 wls_custom_trust:                  &wls_custom_trust              true
@@ -36,29 +40,19 @@ wls_trust_keystore_file:           &wls_trust_keystore_file       '/vagrant/orac
 wls_trust_keystore_passphrase:     &wls_trust_keystore_passphrase 'welcome'
 
 # create a standard domain with custom identity for the adminserver
-domain_instances:
-  'grins_domain':
-    domain_name:                           "grins_domain"
-    adminserver_name:                      "AdminServer"
-    adminserver_address:                   "%{hiera('adminserver_address')}"
-    adminserver_port:                      7001
-    nodemanager_port:                      5556
-    weblogic_password:                     *domain_wls_password
-    domain_template:                       "standard"
-    development_mode:                      false
-    log_output:                            *logoutput
-    adminserver_port:                      7001
-    custom_identity:                       true
-    custom_identity_keystore_filename:     '/vagrant/oracle/identity_admin.jks'
-    custom_identity_keystore_passphrase:   'welcome'
-    custom_identity_alias:                 'admin'
-    custom_identity_privatekey_passphrase: 'welcome'
-#  'D02N02O02':
+#domain_instances:
+#  'grins_domain':
+#    domain_name:                           "grins_domain"
+#    adminserver_name:                      "AdminServer"
+#    adminserver_address:                   "%{hiera('adminserver_address')}"
+#    adminserver_port:                      7001
+#    nodemanager_address:                   'nodemanager_grins_domain'
+#    nodemanager_port:                      5556
+#    weblogic_password:                     *domain_wls_password
 #    domain_template:                       "standard"
 #    development_mode:                      false
 #    log_output:                            *logoutput
-#    domain_name:                           'D02N02O02'
-#    adminserver_port:                      7011
+#    adminserver_port:                      7001
 #    custom_identity:                       true
 #    custom_identity_keystore_filename:     '/vagrant/oracle/identity_admin.jks'
 #    custom_identity_keystore_passphrase:   'welcome'
@@ -66,140 +60,82 @@ domain_instances:
 #    custom_identity_privatekey_passphrase: 'welcome'
 
 file_domain_libs:
-   # '%{hiera('wls_oracle_base_home_dir')}/user_projects/domains/D02N02O02/lib/idmsSecurityProvider-3.26-SNAPSHOT.jar':
-   #    ensure:     present
-   #    source:     '/vagrant/oracle/idmsSecurityProvider-3.26-SNAPSHOT.jar'
-   #    mode:       '0775'
-   #    owner:      'wls'
-   #    group:      'dba'
-   #    require:    Orawls::Domain[D02N02O02]
-   #    before:     Wls_setting[D02N02O02Setting]
 
-wls_setting_instances:
-  'default':
-    user:               *wls_os_user
-    weblogic_home_dir:  *wls_weblogic_home_dir
-    connect_url:        "t3://%{::ipaddress_eth1}:7001"
-    weblogic_user:      *wls_weblogic_user
-    weblogic_password:  *domain_wls_password
-#  'D02N02O02Setting':
+#wls_setting_instances:
+#  'default':
 #    user:               *wls_os_user
 #    weblogic_home_dir:  *wls_weblogic_home_dir
-#    connect_url:        "t3://%{hiera('domain_adminserver_address')}:7011"
+#    connect_url:        "t3://%{::ipaddress_eth1}:7001"
 #    weblogic_user:      *wls_weblogic_user
 #    weblogic_password:  *domain_wls_password
-#    # post_classpath:     "%{hiera('wls_oracle_base_home_dir')}/user_projects/domains/D02N02O02/lib/idmsSecurityProvider-3.26-SNAPSHOT.jar"
 
 # FMW installation on top of WebLogic 10.3.6
 #fmw_installations:
-profile::weblogic::base::addons:
-   'soaPS7':
-     fmw_product:             "soa"
-     fmw_file1:               "ofm_soa_generic_11.1.1.7.0_disk1_1of2.zip"
-     fmw_file2:               "ofm_soa_generic_11.1.1.7.0_disk1_2of2.zip"
-     log_output:              true
-     remote_file:             false
-   'webTierPS7':
-     fmw_product:             "web"
-     fmw_file1:               "ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip"
-     log_output:              true
-     remote_file:             false
-   'osbPS7':
-     fmw_product:             "osb"
-     fmw_file1:               "ofm_osb_generic_11.1.1.7.0_disk1_1of1.zip"
-     log_output:              true
-     remote_file:             false
-   'oudPS5':
-     fmw_product:             'oud'
-     fmw_file1:               'ofm_oud_generic_11.1.1.5.0_disk1_1of1.zip'
-     log_output:              true
-     remote_file:             false
-
-#opatch_instances:
-#profile::weblogic::base::opatch:
-#   '18679977':
-#      ensure:                   "present"
-##      #oracle_product_home_dir:  "/vagrant/oracle/Installers_OVD_OUD/ovd-patches/"
-#      patch_id:                 '18679977'
-#      patch_file:               'p18679977_111221_Generic.zip'
-#      remote_file:              false
-
-#      jdk_home_dir:             "%{hiera('wls_jdk_home_dir')}"
-#      os_group:                 "%{hiera('dft_wls_os_group')}"
-#      os_user:                  "%{hiera('dft_wls_os_user')}"
-#      download_dir:             "/vagrant/oracle"
+#fmw_installations:
+#   'soaPS7':
+#     fmw_product:             "soa"
+#     fmw_file1:               "ofm_soa_generic_11.1.1.7.0_disk1_1of2.zip"
+#     fmw_file2:               "ofm_soa_generic_11.1.1.7.0_disk1_2of2.zip"
+#     log_output:              true
+#     remote_file:             false
+#   'webTierPS7':
+#     fmw_product:             "web"
+#     fmw_file1:               "ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip"
+#     log_output:              true
+#     remote_file:             false
+##   'osbPS7':
+##     fmw_product:             "osb"
+##     fmw_file1:               "ofm_osb_generic_11.1.1.7.0_disk1_1of1.zip"
+##     log_output:              true
+##     remote_file:             false
+#   'oudPS5':
+#     fmw_product:             'oud'
+#     fmw_file1:               'ofm_oud_generic_11.1.1.5.0_disk1_1of1.zip'
+#     log_output:              true
+#     remote_file:             false
 
 # pack domains
-pack_domain_instances:
-  'wlsDomain':
-    log_output:           *logoutput
+#pack_domain_instances:
+#  'wlsDomain':
+#    log_output:           *logoutput
 
-# create and startup the nodemanager
-nodemanager_instances:
-  'nodemanager':
-    log_output:                            *logoutput
-    custom_identity:                       true
-    custom_identity_keystore_filename:     '/vagrant/oracle/identity_admin.jks'
-    custom_identity_keystore_passphrase:   'welcome'
-    custom_identity_alias:                 'admin'
-    custom_identity_privatekey_passphrase: 'welcome'
-    nodemanager_address:                   *domain_adminserver_address
+## create and startup the nodemanager
+#nodemanager_instances:
+#  'nodemanager':
+#    log_output:                            *logoutput
+#    custom_identity:                       true
+#    custom_identity_keystore_filename:     '/vagrant/oracle/identity_admin.jks'
+#    custom_identity_keystore_passphrase:   'welcome'
+#    custom_identity_alias:                 'admin'
+#    custom_identity_privatekey_passphrase: 'welcome'
+#    nodemanager_address:                   *domain_adminserver_address
 
-# startup adminserver for extra configuration
-control_instances:
-  'startWLSAdminServer':
-     domain_name:          'grins_domain'
-     server_type:          'admin'
-     #target:               'Server'
-     target:               'Cluster'
-     server:               'AdminServer'
-     action:               'start'
-     adminserver_port:     7001
-     log_output:           *logoutput
-#  'startWLSAdminServer2':
-#     domain_name:          "D02N02O02"
+## startup adminserver for extra configuration
+#control_instances:
+#  'startWLSAdminServer':
+#     domain_name:          'grins_domain'
 #     server_type:          'admin'
-#     target:               'Server'
+#     #target:               'Server'
+#     target:               'Cluster'
 #     server:               'AdminServer'
 #     action:               'start'
-#     adminserver_port:     7011
+#     adminserver_port:     7001
 #     log_output:           *logoutput
-
-# create password file for WLST utility
-#userconfig_instances:
-#  'D02N02O02':
-#    log_output:           *logoutput
-#    user_config_dir:      '/home/oracle'
 
 authentication_provider_instances:
   'DefaultAuthenticator':
     ensure:             'present'
     control_flag:       'SUFFICIENT'
     # order:              '0'
-    before:             Wls_domain[grins_domain]
-  'ldap':
-    ensure:             'present'
-    control_flag:       'SUFFICIENT'
-    providerclassname:  'weblogic.security.providers.authentication.LDAPAuthenticator'
-    attributes:         'Principal;Host;Port;CacheTTL;CacheSize;MaxGroupMembershipSearchLevel;SSLEnabled'
-    attributesvalues:   'ldapuser;ldapserver;389;60;1024;4;1'
-    # order:              '1'
-    before:             Wls_domain[grins_domain]
-  # 'ActiveDirectoryAuthenticator':
-  #   ensure:             'present'
-  #   control_flag:       'SUFFICIENT'
-  #   providerclassname:  'weblogic.security.providers.authentication.ActiveDirectoryAuthenticator'
-  #   attributes:         'Credential;GroupBaseDN;GroupFromNameFilter;GroupMembershipSearching;Host;MaxGroupMembershipSearchLevel;Principal;UserBaseDN;UserFromNameFilter;UserNameAttribute;Port'
-  #   attributesvalues:   'password;DC=ad,DC=company,DC=org;(&(sAMAccountName=%g)(objectclass=group));limited;ad.company.org;0;CN=SER_WASadmin,OU=Service Accounts,DC=ad,DC=company,DC=org;DC=ad,DC=company,DC=org;(&(sAMAccountName=%u)(objectclass=user));sAMAccountName;389'
-  #   order:              '1'
-  # 'D02N02O02Setting/IdmsAuthenticator':
-  #   ensure:             'present'
-  #   control_flag:       'SUFFICIENT'
-  #   providerclassname:  'nl.rsg.security.idms.providers.authentication.IdmsAuthenticator'
-  #   attributes:         'Endpoint;RequestTimeout;ConnectTimeout'
-  #   attributesvalues:   'http://xxxx.com/MSL/4/AccountService;60000;5000'
-  #   order:              '0'
-  #   before:             Wls_domain[D02N02O02Setting/D02N02O02]
+    before:             Wls_domain[%{::wls_domain}]
+#  'ldap':
+#    ensure:             'present'
+#    control_flag:       'SUFFICIENT'
+#    providerclassname:  'weblogic.security.providers.authentication.LDAPAuthenticator'
+#    attributes:         'Principal;Host;Port;CacheTTL;CacheSize;MaxGroupMembershipSearchLevel;SSLEnabled'
+#    attributesvalues:   'ldapuser;ldapserver;389;60;1024;4;1'
+#    # order:              '1'
+#    before:             Wls_domain[%{::wls_domain}]
 
 identity_asserter_instances:
   'DefaultIdentityAsserter':
@@ -225,18 +161,6 @@ wls_domain_instances:
     log_rotate_logon_startup:    '1'
     log_rotationtype:            'bySize'
     security_crossdomain:        '0'
-#  'D02N02O02Setting/D02N02O02':
-#    ensure:                      'present'
-#    jpa_default_provider:        'org.apache.openjpa.persistence.PersistenceProviderImpl'
-#    jta_max_transactions:        '10000'
-#    jta_transaction_timeout:     '30'
-#    log_file_min_size:           '5000'
-#    log_filecount:               '5'
-#    log_filename:                '/var/log/weblogic/D02N02O02.log'
-#    log_number_of_files_limited: '0'
-#    log_rotate_logon_startup:    '0'
-#    log_rotationtype:            'byTime'
-#    security_crossdomain:        '1'
 
 # subscribe on a domain change and restart the adminserver
 wls_adminserver_instances_domain:
@@ -250,7 +174,7 @@ wls_adminserver_instances_domain:
     weblogic_user:             *wls_weblogic_user
     weblogic_password:         *domain_wls_password
     jdk_home_dir:              '/usr/java/latest'
-    nodemanager_address:       *grins_domain_adminserver_address
+    nodemanager_address:       *adminserver_address
     nodemanager_port:          "%{hiera('domain_nodemanager_port')}"
     jsse_enabled:              true
     custom_trust:              *wls_custom_trust
@@ -258,24 +182,6 @@ wls_adminserver_instances_domain:
     trust_keystore_passphrase: *wls_trust_keystore_passphrase
     refreshonly:               true
     subscribe:                 Wls_domain[grins_domain]
-#  'AdminServer_D02N02O02':
-#    ensure:                    'running'
-#    server_name:               *domain_adminserver
-#    domain_name:               'D02N02O02'
-#    domain_path:               "%{hiera('wls_oracle_base_home_dir')}/user_projects/domains/D02N02O02"
-#    os_user:                   *wls_os_user
-#    weblogic_home_dir:         *wls_weblogic_home_dir
-#    weblogic_user:             *wls_weblogic_user
-#    weblogic_password:         *domain_wls_password
-#    jdk_home_dir:              '/usr/java/latest'
-#    nodemanager_address:       *domain_adminserver_address
-#    nodemanager_port:          "%{hiera('domain_nodemanager_port')}"
-#    jsse_enabled:              true
-#    custom_trust:              *wls_custom_trust
-#    trust_keystore_file:       *wls_trust_keystore_file
-#    trust_keystore_passphrase: *wls_trust_keystore_passphrase
-#    refreshonly:               true
-#    subscribe:                 Wls_domain[D02N02O02]
 
 user_instances:
   'testuser1':
@@ -296,12 +202,6 @@ user_instances:
     authenticationprovider: 'DefaultAuthenticator'
     realm:                  'myrealm'
     description:            'my test user'
-#  'D02N02O02Setting/testuser3':
-#    ensure:                 'present'
-#    password:               'weblogic1'
-#    authenticationprovider: 'DefaultAuthenticator'
-#    realm:                  'myrealm'
-#    description:            'my test user'
 
 group_instances:
   'TestGroup':
@@ -312,9 +212,6 @@ group_instances:
     users:
       - 'testuser1'
       - 'testuser2'
-    # require:
-    #   - Wls_user[testuser1]
-    #   - Wls_user[testuser2]
   'SuperUsers':
     ensure:                 'present'
     authenticationprovider: 'DefaultAuthenticator'
@@ -324,83 +221,44 @@ group_instances:
       - 'testuser2'
     require:
       - Wls_user[testuser2]
-#  'D02N02O02Setting/TestGroup':
-#    ensure:                 'present'
-#    authenticationprovider: 'DefaultAuthenticator'
-#    description:            'SuperUsers'
-#    realm:                  'myrealm'
-#    users:
-#      - 'testuser3'
-#    # require:
-#    #   - Wls_user[D02N02O02Setting/testuser3]
 
 deployment_instances:
-  # 'jersey-bundle':
-  #   ensure:            'present'
-  #   deploymenttype:    'Library'
-  #   versionidentifier: '1.18@1.18.0.0'
-  #   timeout:           60
-  #   target:
-  #     - 'AdminServer'
-  #     - 'WebCluster'
-  #   targettype:
-  #     - 'Server'
-  #     - 'Cluster'
-  #   localpath:         '/vagrant/oracle/jersey-bundle-1.18.war'
-  #   # require:
-  #   #   - Wls_cluster[WebCluster]
-  # 'webapp':
-  #   ensure:            'present'
-  #   deploymenttype:    'AppDeployment'
-  #   versionidentifier: '1.1@1.1.0.0'
-  #   timeout:           60
-  #   target:
-  #     - 'WebCluster'
-  #   targettype:
-  #     - 'Cluster'
-  #   localpath:         '/vagrant/oracle/webapp.war'
-  #   require:
-  #     # - Wls_deployment[jersey-bundle]
-  #     # - Wls_cluster[WebCluster]
-
 
 # create 2 machines
 machines_instances:
-  'LocalMachine':
-    ensure:         'present'
-    listenaddress:  *grins_domain_adminserver_address
-    listenport:     '5556'
-    machinetype:    'UnixMachine'
-    nmtype:         'SSL'
-  'Node1':
+#  'LocalMachine':
+#    ensure:         'present'
+#    listenaddress:  *adminserver_address
+#    listenport:     '5556'
+#    machinetype:    'UnixMachine'
+#    nmtype:         'SSL'
+  'node1':
     ensure:         'present'
     listenaddress:  *domain_node1_address
     listenport:     '5556'
     machinetype:    'UnixMachine'
     nmtype:         'SSL'
-  'Node2':
+  'node2':
     ensure:         'present'
     listenaddress:  *domain_node2_address
     listenport:     '5556'
     machinetype:    'UnixMachine'
     nmtype:         'SSL'
-#  'D02N02O02Setting/Node1':
-#    ensure:         'present'
-#    listenaddress:  *domain_node1_address
-#    listenport:     '5557'
-#    machinetype:    'UnixMachine'
-#    nmtype:         'SSL'
-#  'D02N02O02Setting/Node2':
-#    ensure:         'present'
-#    listenaddress:  *domain_node2_address
-#    listenport:     '5557'
-#    machinetype:    'UnixMachine'
-#    nmtype:         'SSL'
 
 server_vm_args_permsize:      &server_vm_args_permsize     '-XX:PermSize=256m'
 server_vm_args_max_permsize:  &server_vm_args_max_permsize '-XX:MaxPermSize=256m'
 server_vm_args_memory:        &server_vm_args_memory       '-Xms752m'
 server_vm_args_max_memory:    &server_vm_args_max_memory   '-Xmx752m'
+
+#should be moved to common
+wls_java_arguments:
+  - *server_vm_args_permsize
+  - *server_vm_args_max_permsize
+  - *server_vm_args_memory
+  - *server_vm_args_max_memory
+  - "-Dweblogic.Stdout=${log_dir}/${::hostname}.out"
+  - "-Dweblogic.Stderr=${log_dir}/${::hostname}_err.out"
+#########
 
 server_instances:
   'AdminServer':
@@ -412,7 +270,7 @@ server_instances:
            - *server_vm_args_max_memory
            - '-Dweblogic.Stdout=/var/log/weblogic/AdminServer.out'
            - '-Dweblogic.Stderr=/var/log/weblogic/AdminServer_err.out'
-    listenaddress:                         *grins_domain_adminserver_address
+    listenaddress:                         *adminserver_address
     listenport:                            '7001'
     machine:                               'LocalMachine'
     logfilename:                           '/var/log/weblogic/AdminServer.log'
@@ -461,7 +319,7 @@ server_instances:
     log_number_of_files_limited:           '1'
     log_rotate_logon_startup:              '1'
     log_rotationtype:                      'bySize'
-    machine:                               'Node1'
+    machine:                               'node1'
     sslenabled:                            '1'
     ssllistenport:                         '8201'
     sslhostnameverificationignored:        '1'
@@ -477,7 +335,7 @@ server_instances:
     trust_keystore_passphrase:             *wls_trust_keystore_passphrase
     max_message_size:                      '25000000'
     # require:
-    #   - Wls_machine[Node1]
+    #   - Wls_machine[node1]
   'grins_ws_2':
     ensure:                                'present'
     arguments:
@@ -496,7 +354,7 @@ server_instances:
     log_number_of_files_limited:           '1'
     log_rotate_logon_startup:              '1'
     log_rotationtype:                      'bySize'
-    machine:                               'Node2'
+    machine:                               'node2'
     sslenabled:                            '1'
     ssllistenport:                         '8201'
     sslhostnameverificationignored:        '1'
@@ -511,51 +369,7 @@ server_instances:
     trust_keystore_passphrase:             *wls_trust_keystore_passphrase
     max_message_size:                      '25000000'
     # require:
-    #   - Wls_machine[Node2]
-#  'D02N02O02Setting/grins_ws_1':
-#    ensure:                                'present'
-#    arguments:                             '-XX:PermSize=256m -XX:MaxPermSize=256m -Xms752m -Xmx752m -Dweblogic.Stdout=/var/log/weblogic/grins_ws_1.out -Dweblogic.Stderr=/var/log/weblogic/grins_ws_1_err.out'
-#    listenaddress:                         *domain_node1_address
-#    listenport:                            '8005'
-#    logfilename:                           '/var/log/weblogic/grins_ws_1_dm2.log'
-#    log_datasource_filename:               '/var/log/weblogic/grins_ws_1_dm2_datasource.log'
-#    log_http_filename:                     '/var/log/weblogic/grins_ws_1_dm2_access.log'
-#    machine:                               'Node1'
-#    sslenabled:                            '1'
-#    ssllistenport:                         '8205'
-#    sslhostnameverificationignored:        '1'
-#    jsseenabled:                           '1'
-#    custom_identity:                       '1'
-#    custom_identity_keystore_filename:     '/vagrant/oracle/identity_node1.jks'
-#    custom_identity_keystore_passphrase:   'welcome'
-#    custom_identity_alias:                 'node1'
-#    custom_identity_privatekey_passphrase: 'welcome'
-#    trust_keystore_file:                   *wls_trust_keystore_file
-#    trust_keystore_passphrase:             *wls_trust_keystore_passphrase
-#    # require:
-#    #   - Wls_machine[D02N02O02Setting/Node1]
-#  'D02N02O02Setting/grins_ws_2':
-#    ensure:                                'present'
-#    arguments:                             '-XX:PermSize=256m -XX:MaxPermSize=256m -Xms752m -Xmx752m -Dweblogic.Stdout=/var/log/weblogic/grins_ws_2.out -Dweblogic.Stderr=/var/log/weblogic/grins_ws_2_err.out'
-#    listenport:                            '8005'
-#    logfilename:                           '/var/log/weblogic/grins_ws_2_dm2.log'
-#    log_datasource_filename:               '/var/log/weblogic/grins_ws_2_dm2_datasource.log'
-#    log_http_filename:                     '/var/log/weblogic/grins_ws_2_dm2_access.log'
-#    machine:                               'Node2'
-#    sslenabled:                            '1'
-#    ssllistenport:                         '8205'
-#    sslhostnameverificationignored:        '1'
-#    listenaddress:                         *domain_node2_address
-#    jsseenabled:                           '1'
-#    custom_identity:                       '1'
-#    custom_identity_keystore_filename:     '/vagrant/oracle/identity_node2.jks'
-#    custom_identity_keystore_passphrase:   'welcome'
-#    custom_identity_alias:                 'node2'
-#    custom_identity_privatekey_passphrase: 'welcome'
-#    trust_keystore_file:                   *wls_trust_keystore_file
-#    trust_keystore_passphrase:             *wls_trust_keystore_passphrase
-#    # require:
-    #   - Wls_machine[D02N02O02Setting/Node2]
+    #   - Wls_machine[node2]
 
 # subscribe on a adminserver change and restart the adminserver
 wls_adminserver_instances_server:
@@ -569,7 +383,7 @@ wls_adminserver_instances_server:
     weblogic_user:             *wls_weblogic_user
     weblogic_password:         *domain_wls_password
     jdk_home_dir:              '/usr/java/latest'
-    nodemanager_address:       *grins_domain_adminserver_address
+    nodemanager_address:       *adminserver_address
     nodemanager_port:          "%{hiera('domain_nodemanager_port')}"
     jsse_enabled:              true
     custom_trust:              *wls_custom_trust
@@ -642,23 +456,12 @@ cluster_instances:
     # datasourceforjobscheduler:  'jmsDS'
     messagingmode:              'unicast'
     unicastbroadcastchannel:    'Channel-Cluster'
-    frontendhost:               *grins_domain_adminserver_address
+    frontendhost:               *adminserver_address
     frontendhttpport:           '2001'
     frontendhttpsport:          '2002'
     # require:
     #   - Wls_server[grins_ws_1]
     #   - Wls_server[grins_ws_2]
-#  'D02N02O02Setting/WebCluster':
-#    ensure:                     'present'
-#    migrationbasis:             'consensus'
-#    servers:
-#      - 'grins_ws_1'
-#      - 'grins_ws_2'
-#    messagingmode:              'unicast'
-#    # require:
-#    #   - Wls_server[D02N02O02Setting/grins_ws_1]
-#    #   - Wls_server[D02N02O02Setting/grins_ws_2]
-
 
 mail_session_instances:
   'myMailSession':
@@ -682,7 +485,7 @@ virtual_host_instances:
    targettype:         'Cluster'
    virtual_host_names:
      - 'admin.example.com'
-     - *grins_domain_adminserver_address
+     - *adminserver_address
    # require:
    #   - Wls_cluster[WebCluster]
 
@@ -738,19 +541,6 @@ datasource_instances:
 
 
 multi_datasource_instances:
-  # 'myMultiDatasource':
-  #   ensure:        present
-  #   jndinames:     'myMultiDatasource'
-  #   testfrequency: 120
-  #   algorithmtype: 'Failover'
-  #   datasources:
-  #     - 'jmsDS'
-  #   target:
-  #     - 'grins_ws_1'
-  #     - 'grins_ws_2'
-  #   targettype:
-  #    - 'Server'
-  #    - 'Server'
 
 file_persistence_folders:
    "%{hiera('wls_oracle_base_home_dir')}/user_projects/domains/grins_domain/persistence1":
@@ -827,18 +617,6 @@ jmsserver_instances:
        - 'Server'
      # require:
      #   - Wls_server[grins_ws_2]
-#   'D02N02O02Setting/jmsServer1':
-#     ensure:              'present'
-#     target:
-#       - 'grins_ws_1'
-#     targettype:
-#       - 'Server'
-#   'D02N02O02Setting/jmsServer2':
-#     ensure:              'present'
-#     target:
-#       - 'grins_ws_2'
-#     targettype:
-#       - 'Server'
 
 jms_module_instances:
    'jmsClusterModule':
@@ -848,13 +626,7 @@ jms_module_instances:
      targettype:
        - 'Cluster'
      # require:     Wls_cluster[WebCluster]
-#   'D02N02O02Setting/jmsClusterModule':
-#     ensure:      'present'
-#     target:
-#       - 'WebCluster'
-#     targettype:
-#       - 'Cluster'
-#
+ 
 # create jms quotas for the jms module
 jms_quota_instances:
    'jmsClusterModule:QuotaBig':
@@ -906,20 +678,6 @@ jms_subdeployment_instances:
       #   - Wls_jms_module[jmsClusterModule]
       #   - Wls_safagent[jmsSAFAgent1]
       #   - Wls_safagent[jmsSAFAgent2]
-#   'D02N02O02Setting/jmsClusterModule:jmsServers':
-#      ensure:     'present'
-#      target:
-#        - 'jmsServer1'
-#        - 'jmsServer2'
-#      targettype:
-#        - 'JMSServer'
-#        - 'JMSServer'
-#   'D02N02O02Setting/jmsClusterModule:wlsServers':
-#      ensure:     'present'
-#      target:
-#        - 'WebCluster'
-#      targettype:
-#        - 'Cluster'
 
 jms_connection_factory_instances:
   'jmsClusterModule:cf':
@@ -942,15 +700,7 @@ jms_connection_factory_instances:
       xaenabled:          '1'
       # require:
       #   - Wls_jms_module[jmsClusterModule]
-#  'D02N02O02Setting/jmsClusterModule:cf':
-#      ensure:             'present'
-#      jmsmodule:          'jmsClusterModule'
-#      defaulttargeting:   '0'
-#      jndiname:           'jms/cf'
-#      subdeployment:      'wlsServers'
-#      transactiontimeout: '3600'
-#      xaenabled:          '0'
-#
+ 
 jms_queue_instances:
    'jmsClusterModule:ErrorQueue':
      ensure:                   'present'
@@ -997,29 +747,6 @@ jms_queue_instances:
      # require:
      #   - Wls_jms_module[jmsClusterModule]
      #   - Wls_jms_subdeployment[jmsClusterModule:jmsServers]
-#   'D02N02O02Setting/jmsClusterModule:ErrorQueue':
-##     ensure:                   'present'
-#     distributed:              '1'
-#     expirationpolicy:         'Discard'
-#     jndiname:                 'jms/ErrorQueue'
-#     redeliverydelay:          '-1'
-#     redeliverylimit:          '-1'
-#     subdeployment:            'jmsServers'
-#     defaulttargeting:         '0'
-#     timetodeliver:            '-1'
-#     timetolive:               '-1'
-#   'D02N02O02Setting/jmsClusterModule:Queue1':
-#     ensure:                   'present'
-#     distributed:              '1'
-#     errordestination:         'ErrorQueue'
-#     expirationpolicy:         'Redirect'
-#     jndiname:                 'jms/Queue1'
-#     redeliverydelay:          '2000'
-#     redeliverylimit:          '3'
-#     subdeployment:            'jmsServers'
-#     defaulttargeting:         '0'
-#     timetodeliver:            '-1'
-#     timetolive:               '300000'
 
 jms_topic_instances:
    'jmsClusterModule:Topic1':
@@ -1253,4 +980,10 @@ workmanager_constraint_instances:
     constrainttype:  'MinThreadsConstraint'
     # require:         Wls_cluster[WebCluster]
 
+webtier_instances:
+  'ohs1':
+    action_name:           'create'
+    instance_name:         'ohs1'
+    webgate_configure:     true
+    log_output:            *logoutput
 
