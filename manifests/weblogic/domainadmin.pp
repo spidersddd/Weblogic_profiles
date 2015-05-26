@@ -8,8 +8,6 @@
 #  some of the flexability that weblogic has.  It is
 #  built to have some sane defaults around the services.
 class profile::weblogic::domainadmin (
-#  include weblogic::services::domains
-
   $wls_filename                          = $profile::weblogic::params::wls_filename,
   $wls_version                           = $profile::weblogic::params::wls_version,
   $wls_os_user                           = $profile::weblogic::params::wls_os_user,
@@ -75,13 +73,6 @@ class profile::weblogic::domainadmin (
     before => Anchor['profile::weblogic::domainadmin::end'],
   }
 
-  #@@host { $::fqdn:
-  #  ensure    => present,
-  #  ip        => $::ipaddress_eth1,
-  #  host_aliases => [$::hostname, "domainadmin_${wls_domain}"],
-  #  tag          => $wls_domain,
-  #}
-
   profile::weblogic::export_service_host { $::fqdn:
     service => 'domainadmin',
   }
@@ -116,21 +107,25 @@ class profile::weblogic::domainadmin (
     custom_identity_keystore_passphrase   => $custom_identity_keystore_passphrase,
     custom_identity_alias                 => $custom_identity_alias,
     custom_identity_privatekey_passphrase => $custom_identity_privatekey_passphrase,
+    require                               => Class['profile::weblogic::base'],
   }
 
   create_resources('file', $file_domain_libs, $default_params)
   
-  wls_setting { 'default':
+  @@wls_setting { 'default':
     user              => $wls_os_user,
     weblogic_home_dir => $weblogic_home_dir,
     connect_url       => "t3://${adminserver_address}:${adminserver_port}",
     weblogic_user     => $weblogic_user,
     weblogic_password => $weblogic_password,
-    require           => Weblogic::Domain[$wls_domain],
+    require           => Class['profile::weblogic::base'],
+    tag               => $wls_domain,
   }
+  
+  Wls_setting <<| tag == $wls_domain |>>
 
   #Replaces weblogic::services::nodemanager
-    @@weblogic::nodemanager { "${wls_domain}_${::hostname}":
+    weblogic::nodemanager { "${wls_domain}_${::hostname}":
     version                               => $wls_version,
     middleware_home_dir                   => $middleware_home_dir,
     weblogic_home_dir                     => $weblogic_home_dir,
@@ -159,7 +154,7 @@ class profile::weblogic::domainadmin (
     require                               => Wls_setting['default'],
   }
 
-  Weblogic::Domain <<| tag == $wls_domain |>>
+  #Weblogic::Domain <<| tag == $wls_domain |>>
 
   #Replaces weblogic::services::startwls
   weblogic::control { "startWLS${adminserver_name}":
@@ -186,26 +181,21 @@ class profile::weblogic::domainadmin (
   }
 
   #Replace weblogic::services::userconfig
-  #create_resources('weblogic::storeuserconfig',$userconfig_instances, $storeuser_default_params)
   class { 'profile::weblogic::ordering::userconfig':
     userconfig_default_params => {
       require                 => [ Weblogic::Domain[$wls_domain], ],
     },
-    userconfig_instances      => $userconfig_instances,
+    userconfig_instances => $userconfig_instances,
   }
-  
 
   #Replace weblogic::services::security
-  #create_resources('wls_user',$user_instances, $security_default_params)
-  #create_resources('wls_group',$group_instances, $security_default_params)
-  #create_resources('wls_authentication_provider',$authentication_provider_instances, $security_default_params)
   class { 'profile::weblogic::ordering::security':
     security_default_params => {
       require               => Class['profile::weblogic::ordering::userconfig'],
     },
-    user_instances              => $user_instances,
-    group_instances             => $group_instances,
-    authentication_provider     => $authentication_provider,
+    user_instances          => $user_instances,
+    group_instances         => $group_instances,
+    authentication_provider => $authentication_provider,
   }
 
   class { 'profile::weblogic::ordering::basic_config':
@@ -222,20 +212,6 @@ class profile::weblogic::domainadmin (
     server_template_instances        => $server_template_instances,
     mail_session_instances           => $mail_session_instances,
   }
-  #include weblogic::services::basic_config
-  #  create_resources('wls_domain',$wls_domain_instances, $default_params)
-
-  # subscribe on domain changes
-  #  create_resources('wls_adminserver', $wls_adminserver_instances_domain, $default_params)
-  #create_resources('wls_machine', $machines_instances, $default_params)
-  #create_resources('wls_server', $server_instances, $default_params)
-  
-  # subscribe on server changes
-  #create_resources('wls_server_channel', $server_channel_instances, $default_params)
-  #create_resources('wls_cluster', $cluster_instances, $default_params)
-#  create_resources('wls_coherence_cluster', $coherence_cluster_instances, $default_params)
-#  create_resources('wls_server_template', $server_template_instances, $default_params)
-#  create_resources('wls_mail_session', $mail_session_instances, $default_params)
 
   anchor { 'profile::weblogic::domainadmin::end':
     require => [ Anchor['profile::weblogic::domainadmin::begin'], Weblogic::Packdomain[$wls_domain], ],

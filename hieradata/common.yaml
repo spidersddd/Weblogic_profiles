@@ -18,6 +18,7 @@ dft_wls_log_dir:                            "/opt/log/weblogic"
 wls_weblogic_home_dir:                       "%{hiera('dft_wls_weblogic_home_dir')}"
 wls_middleware_home_dir:                     "%{hiera('dft_wls_middleware_home_dir')}"
 wls_download_dir:                             '/tmp/oracle'
+wls_domains_dir:                              "%{domains_dir}"
 
 # this will use default as profile::weblogic::setting identifier
 authentication_provider_instances:
@@ -35,7 +36,7 @@ authentication_provider_instances:
 #node2_address:          "172.22.5.11"
 
 #domain_adminserver_address: "%{hiera('adminserver_address')}"
-#domain_adminserver_port:    "7001"
+domain_adminserver_port:    "7001"
 #domain_node1_address:       "%{hiera('node1_address')}"
 #domain_node2_address:       "%{hiera('node2_address')}"
 

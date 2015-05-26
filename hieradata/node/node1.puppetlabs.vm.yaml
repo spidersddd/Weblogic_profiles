@@ -1,38 +1,7 @@
 ---
 logoutput:                &logoutput                true
-orawls::weblogic::log_output:   *logoutput
-
-wls_os_user:              &wls_os_user              "%{hiera('dft_wls_os_user')}"
-wls_weblogic_user:        &wls_weblogic_user        "%{hiera('dft_wls_weblogic_user')}"
-wls_weblogic_home_dir:    &wls_weblogic_home_dir    "%{hiera('dft_wls_weblogic_home_dir')}"
-wls_middleware_home_dir:  &wls_middleware_home_dir  "%{hiera('dft_wls_middleware_home_dir')}"
-weblogic::provision::source: '/vagrant/oracle'
-
-
-# when you have just one domain on a server
-domain_name:                &domain_name                "grins_domain"
-domain_adminserver:         &domain_adminserver         "AdminServer"
-domain_adminserver_address: &domain_adminserver_address "%{hiera('adminserver_address')}"
-domain_nodemanager_port:    &domain_nodemanager_port    5556
-domain_wls_password:        &domain_wls_password        "weblogic1"
-#domain_adminserver_port:    &domain_adminserver_port    7001
-#domain_user_config_file:    "/home/oracle/wls-grins_domainadmin-WebLogicConfig.properties"
-#domain_user_key_file:       "/home/oracle/wls-grins_domainadmin-WebLogicKey.properties"
 
 domain_node1_address: &domain_node1_address "%{hiera('node1_address')}"
-domain_node2_address: &domain_node2_address "%{hiera('node2_address')}"
-
-#orautils::nodeMgrAddressParam:    *domain_node1_address
-
-# custom trust
-#orautils::customTrust:             true
-#orautils::trustKeystoreFile:       '/vagrant/oracle/truststore.jks'
-#orautils::trustKeystorePassphrase: 'welcome'
-
-# used by nodemanager, control and domain creation
-wls_custom_trust:                  &wls_custom_trust              true
-wls_trust_keystore_file:           &wls_trust_keystore_file       '/vagrant/oracle/truststore.jks'
-wls_trust_keystore_passphrase:     &wls_trust_keystore_passphrase 'welcome'
 
 # copy domains to other nodes
 copy_instances:
@@ -40,32 +9,32 @@ copy_instances:
      log_output:              *logoutput
 
 
-wls_setting_instances:
-  'default':
-    user:               *wls_os_user
-    weblogic_home_dir:  "%{hiera('dft_wls_weblogic_home_dir')}"
-    connect_url:        "t3://%{hiera('adminserver_address')}:7001"
-    weblogic_user:      "%{hiera('dft_wls_weblogic_user')}"
-    weblogic_password:  "%{hiera('dft_domain_wls_password')}"
+#wls_setting_instances:
+#  'default':
+#    user:               *wls_os_user
+#    weblogic_home_dir:  "%{hiera('dft_wls_weblogic_home_dir')}"
+#    connect_url:        "t3://%{hiera('adminserver_address')}:7001"
+#    weblogic_user:      "%{hiera('dft_wls_weblogic_user')}"
+#    weblogic_password:  "%{hiera('dft_domain_wls_password')}"
 
 # create and startup the nodemanager
-nodemanager_instances:
-  'nodemanager':
-    log_output:                            *logoutput
-    nodemanager_address:                   *domain_node1_address
-    custom_identity:                       true
-    custom_identity_keystore_filename:     '/vagrant/oracle/identity_node1.jks'
-    custom_identity_keystore_passphrase:   'welcome'
-    custom_identity_alias:                 'node1'
-    custom_identity_privatekey_passphrase: 'welcome'
+#nodemanager_instances:
+#  'nodemanager':
+#    log_output:                            *logoutput
+#    nodemanager_address:                   *domain_node1_address
+#    custom_identity:                       true
+#    custom_identity_keystore_filename:     '/vagrant/oracle/identity_node1.jks'
+#    custom_identity_keystore_passphrase:   'welcome'
+#    custom_identity_alias:                 'node1'
+#    custom_identity_privatekey_passphrase: 'welcome'
     
 control_instances:
   'startWLSDomainServer':
-     domain_name:          'grins_domain'
-     server_type:          'admin'
+     domain_name:          'WebCluster'
+     server_type:          'managed'
      target:               'Cluster'
      server:               *domain_node1_address
      action:               'start'
-     adminserver_port:     7003
+     adminserver_port:     "%{hiera('domain_adminserver_port')}"
      log_output:           *logoutput
 
