@@ -1,0 +1,5 @@
+#!/bin/bash
+
+kill -9 `ps -ef |grep oracle | awk '{print $2}'`
+
+puppet apply /root/reset.pp
