@@ -34,6 +34,8 @@ class profile::weblogic::base (
 
   Host <<| tag == $wls_domain |>>
 
+  profile::websphere::mount { '/tmp/webhosting': }
+
   contain profile::weblogic::java
 
   class { '::weblogic::utils::user':
@@ -41,6 +43,7 @@ class profile::weblogic::base (
     user_group    => $wls_os_group,
     user_home     => "/home/${wls_os_user}",
     user_password => '$1$v4K9E8Wj$gZIHJ5JtQL5ZGZXeqSSsd0',
+    require       => Profile::Websphere::Mount['/tmp/webhosting'],
   }
 
   class { '::weblogic::os':
