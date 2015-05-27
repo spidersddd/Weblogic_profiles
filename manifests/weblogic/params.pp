@@ -49,5 +49,22 @@ class profile::weblogic::params {
       fail "Operating System family ${::osfamily} not supported"
     }
   }
+  case $::lfg_sysrole {
+    'wlsmgr': {
+      $wls_role = hiera('wls_role', 'domainadmin')
+    }
+    'wls': {
+      $wls_role = hiera('wls_role', 'nodemanager')
+    }
+    'ohs': {
+      $wls_role = hiera('wls_role', 'ohs')
+    }
+    'all': {
+      $wls_role = hiera('wls_role', 'allin1')
+    }
+    default: {
+      fail "lfg_sysrole is not set correctly, possible values are [wlsmgr, wls, ohs, all], $::lfg_sysrole"
+    }
+  }
 }
 
