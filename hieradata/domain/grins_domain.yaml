@@ -1,10 +1,9 @@
 ---
-adminserver_address:    "172.22.5.5"
-node1_address:          "172.22.5.10"
-node2_address:          "172.22.5.11"
+#adminserver_address:    "172.22.5.30"
+node1_address:          "172.22.5.40"
+node2_address:          "172.22.5.41"
 
 logoutput:                &logoutput                true
-#orawls::weblogic::log_output:   *logoutput
 
 wls_version:                                        '1036'
 wls_os_user:              &wls_os_user              "webadmin"
@@ -24,7 +23,7 @@ domain_wls_password:        &domain_wls_password        "%{hiera('dft_wls_weblog
 domain_nodemanager_port:    '5556'
 
 #adminserver_address: &adminserver_address "AdminServer"
-adminserver_address: &adminserver_address  "172.22.5.5"
+adminserver_address: &adminserver_address  "172.22.5.30"
 
 domain_node1_address: &domain_node1_address "%{hiera('node1_address')}"
 domain_node2_address: &domain_node2_address "%{hiera('node2_address')}"
@@ -177,9 +176,9 @@ wls_adminserver_instances_domain:
     nodemanager_address:       *adminserver_address
     nodemanager_port:          "%{nodemanager_port}"
     jsse_enabled:              true
-    custom_trust:              *wls_custom_trust
-    trust_keystore_file:       *wls_trust_keystore_file
-    trust_keystore_passphrase: *wls_trust_keystore_passphrase
+#    custom_trust:              *wls_custom_trust
+#    trust_keystore_file:       *wls_trust_keystore_file
+#    trust_keystore_passphrase: *wls_trust_keystore_passphrase
     refreshonly:               true
     subscribe:                 Wls_domain[grins_domain]
 
@@ -258,6 +257,9 @@ wls_java_arguments:
   - *server_vm_args_max_memory
   - "-Dweblogic.Stdout=${log_dir}/${::hostname}.out"
   - "-Dweblogic.Stderr=${log_dir}/${::hostname}_err.out"
+  - '-Dweblogic.security.SSL.enforceConstraints=off'
+  - '-Dssl.debug=true'
+  - '-Dweblogic.security.SSL.ignoreHostnameVerification=true'
   - '-Dweblogic.security.TrustKeyStore=DemoTrust'
 #########
 
@@ -271,6 +273,9 @@ server_instances:
            - *server_vm_args_max_memory
            - '-Dweblogic.Stdout=/var/log/weblogic/AdminServer.out'
            - '-Dweblogic.Stderr=/var/log/weblogic/AdminServer_err.out'
+           - '-Dweblogic.security.SSL.ignoreHostnameVerification=true'
+           - '-Dweblogic.security.SSL.enforceConstraints=off'
+           - '-Dssl.debug=true'
            - '-Dweblogic.security.TrustKeyStore=DemoTrust'
     listenaddress:                         *adminserver_address
     listenport:                            '7001'
@@ -313,9 +318,12 @@ server_instances:
            - *server_vm_args_max_memory
            - "-Dweblogic.Stdout=${log_dir}/node1_ws.out"
            - "-Dweblogic.Stderr=${log_dir}/node1_ws_err.out"
+           - '-Dweblogic.security.SSL.enforceConstraints=off'
+           - '-Dssl.debug=true'
+           - '-Dweblogic.security.SSL.ignoreHostnameVerification=true'
            - '-Dweblogic.security.TrustKeyStore=DemoTrust'
     listenaddress:                         *domain_node1_address
-    listenport:                            "%{adminserver_port}"
+    listenport:                            '7003'
     logfilename:                           "%{log_dir}/node1_ws.log"
     log_datasource_filename:               "%{log_dir}/node1_ws_datasource.log"
     log_http_filename:                     "%{log_dir}/node1_ws_access.log"
@@ -352,6 +360,9 @@ server_instances:
            - *server_vm_args_max_memory
            - '-Dweblogic.Stdout=/var/log/weblogic/node2_ws.out'
            - '-Dweblogic.Stderr=/var/log/weblogic/node2_ws_err.out'
+           - '-Dweblogic.security.SSL.enforceConstraints=off'
+           - '-Dssl.debug=true'
+           - '-Dweblogic.security.SSL.ignoreHostnameVerification=true'
            - '-Dweblogic.security.TrustKeyStore=DemoTrust'
     listenport:                            '7003'
     logfilename:                           '/var/log/weblogic/node2_ws.log'
@@ -386,7 +397,7 @@ server_channel_instances:
     enabled:          '1'
     httpenabled:      '1'
     listenaddress:    *domain_node1_address
-    listenport:       '7001'
+    listenport:       '8003'
     outboundenabled:  '0'
     protocol:         'cluster-broadcast'
     publicaddress:    *domain_node1_address
@@ -398,7 +409,7 @@ server_channel_instances:
     enabled:          '1'
     httpenabled:      '1'
     listenaddress:    *domain_node2_address
-    listenport:       '7001'
+    listenport:       '8003'
     outboundenabled:  '0'
     protocol:         'cluster-broadcast'
     publicaddress:    *domain_node2_address
@@ -854,13 +865,15 @@ safagent_instances:
 saf_remote_context_instances:
   'jmsClusterModule:RemoteSAFContext-0':
      ensure:            'present'
-     connect_url:       't3://10.10.10.10:7001'
+     connect_url:       't3://172.22.5.30:7001'
      weblogic_user:     'weblogic'
      weblogic_password: 'weblogic1'
      # require:           Wls_jms_module[jmsClusterModule]
   'jmsClusterModule:RemoteSAFContext-1':
      ensure:            'present'
-     connect_url:       't3://10.10.10.10:7001'
+     connect_url:       't3://172.22.5.30:7001'
+     weblogic_user:     'weblogic'
+     weblogic_password: 'weblogic1'
      # require:           Wls_jms_module[jmsClusterModule]
 
 saf_error_handler_instances:
@@ -972,5 +985,5 @@ webtier_instances:
     action_name:           'create'
     instance_name:         'ohs1'
     webgate_configure:     true
-    log_output:            *logoutput
+    log_output:            "%{hiera('logoutput')}"
 
