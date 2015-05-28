@@ -21,6 +21,7 @@ class profile::weblogic::nodemanager2 (
   $adminserver_name                      = $profile::weblogic::params::adminserver_name,
   $adminserver_port                      = $profile::weblogic::params::adminserver_port,
   $java_arguments                        = $profile::weblogic::params::java_arguments,
+  $jsse_enabled                           = $profile::weblogic::params::jsse_enabled,
   $nodemanager_address                   = $::ipaddress_eth1,
   $nodemanager_port                      = $profile::weblogic::params::nodemanager_port,
   $weblogic_user                         = $profile::weblogic::params::wls_weblogic_user,
@@ -38,12 +39,16 @@ class profile::weblogic::nodemanager2 (
   $file_domain_libs                      = hiera('file_domain_libs', {}),
   $fmw_plugins                           = hiera_hash('fmw_installations', {}),
   $opatch                                = hiera_hash('profile::weblogic::base::opatch', {}),
+  $control_instances                     = hiera('control_instances', {}),
   #$default_params                        = hiera('wls_default_params', {}),
 
   )  inherits profile::weblogic::params {
 
+  $local_admin_port = ( $adminserver_port + 2 )
+  $ssllocal_admin_port = ( $local_admin_port + 200 )
 
   $default_params = { }
+  $start_default_params = { require => Weblogic::Nodemanager['nodemanager'] }
 
   anchor { 'profile::weblogic::nodemanager::begin':
     before => Anchor['profile::weblogic::nodemanager::end'],
@@ -90,14 +95,60 @@ class profile::weblogic::nodemanager2 (
 
   Wls_setting <<| tag == $wls_domain |>>
 
-  weblogic::nodemanager { "${wls_domain}_nm":
+  @@wls_machine { "$::hostname":
+    ensure        => present,
+    domain        => $wls_domain,
+    listenaddress => $nodemanager_address,
+    listenport    => $nodemanager_port,
+    machinetype   => 'UnixMachine',
+    nmtype        => 'SSL',
+    timeout       => '120',
+    tag           => $wls_domain,
+    require       => Wls_setting['default'],
+    notify        => Wls_adminserver["AdminServer_${wls_domain}"],
+  }
+
+  @@wls_server { "${::hostname}_${wls_domain}":
+    ensure                                => present,
+    arguments                             => $java_arguments,
+    client_certificate_enforced           => '0',
+    custom_identity                       => '0',
+    custom_identity_alias                 => $custom_identity_alias,
+    custom_identity_keystore_filename     => $custom_identity_keystore_filename,
+    custom_identity_keystore_passphrase   => $custom_identity_keystore_passphrase,
+    custom_identity_privatekey_passphrase => $custom_identity_privatekey_passphrase,
+    domain                                => $wls_domain,
+    jsseenabled                           => '1',
+    listenaddress                         => $nodemanager_address,
+    listenport                            => $local_admin_port,
+    log_redirect_stderr_to_server         => "%{log_dir}/${title}_datasource.log",
+    log_http_filename                     => "%{log_dir}/${title}_access.log",
+    log_file_min_size                     => '2000',
+    log_filecount                         => '10',
+    log_number_of_files_limited           => '1',
+    log_rotate_logon_startup              => '1',
+    log_rotationtype                      => 'bySize',
+    machine                               => $::hostname,
+    sslenabled                            => '1',
+    ssllistenport                         => $ssllocal_admin_port,
+    sslhostnameverificationignored        => '1',
+    two_way_ssl                           => '0',
+    max_message_size                      => '25000000',
+    trust_keystore_file                   => $trust_keystore_file,
+    trust_keystore_passphrase             => $trust_keystore_passphrase,
+    weblogic_plugin_enabled               => '1',
+    notify                                => Wls_adminserver["AdminServer_${wls_domain}"],
+    tag                                   => $wls_domain,
+  }
+
+  weblogic::nodemanager { 'nodemanager':
     version                               => $wls_version,
     middleware_home_dir                   => $middleware_home_dir,
     weblogic_home_dir                     => $weblogic_home_dir,
     nodemanager_port                      => $nodemanager_port,
-    nodemanager_address                   => $nodemanager_address,
+    nodemanager_address                   => undef,
     nodemanager_secure_listener           => true,
-    jsse_enabled                          => true,
+    jsse_enabled                          => $jsseenabled,
     custom_trust                          => $custom_trust,
     trust_keystore_file                   => $trust_keystore_file,
     trust_keystore_passphrase             => $trust_keystore_passphrase,
@@ -118,20 +169,23 @@ class profile::weblogic::nodemanager2 (
     #    require                               => Wls_setting['default'],
   }
 
-  weblogic::control { "startWLS${wls_domain}":
-    domain_name      => $wls_domain,
-    server_type      => 'managed',
-    target           => 'Cluster',
-    server           => "WebCluster",
-    action           => 'start',
-    adminserver_port => $adminserver_port,
-    log_output       => $log_output,
-    require          => Wls_setting['default'],
-  }
+  #  weblogic::control { "startWLS${wls_domain}":
+  #  domain_name      => $wls_domain,
+  #  server_type      => 'managed',
+  #  target           => '',
+  #  server           => '',
+  #  action           => 'start',
+  #  adminserver_port => $adminserver_port,
+  #  log_output       => $log_output,
+  #  require          => Wls_setting['default'],
+  #}
+
+
+  create_resources('weblogic::control',$control_instances, $start_default_params)
 
   anchor { 'profile::weblogic::nodemanager::end':
     require => [ Anchor['profile::weblogic::nodemanager::begin'],
-      Weblogic::Nodemanager["${wls_domain}_nm"],
+      Weblogic::Nodemanager['nodemanager'],
     ],
   }
   

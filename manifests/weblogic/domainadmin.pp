@@ -67,7 +67,7 @@ class profile::weblogic::domainadmin (
 
   $default_params = { require           => Weblogic::Domain["$wls_domain"], }
   $storeuser_default_params = { require => Weblogic::Control["startWLS${adminserver_name}"], }
-  $security_default_params = { require  => Weblogic::Control["startWLS${adminserver_name}"], }
+  $security_default_params = { } #require  => Weblogic::Control["startWLS${adminserver_name}"], }
 
   anchor { 'profile::weblogic::domainadmin::begin':
     before => Anchor['profile::weblogic::domainadmin::end'],
@@ -78,6 +78,7 @@ class profile::weblogic::domainadmin (
   }
 
   contain profile::weblogic::base
+
 
   # Replaces weblogic::services::domain
   weblogic::domain { $wls_domain:
@@ -125,12 +126,12 @@ class profile::weblogic::domainadmin (
   Wls_setting <<| tag == $wls_domain |>>
 
   #Replaces weblogic::services::nodemanager
-    weblogic::nodemanager { "${wls_domain}_${::hostname}":
+    weblogic::nodemanager { 'nodemanager':
     version                               => $wls_version,
     middleware_home_dir                   => $middleware_home_dir,
     weblogic_home_dir                     => $weblogic_home_dir,
     nodemanager_port                      => $nodemanager_port,
-    nodemanager_address                   => $nodemanager_address,
+    nodemanager_address                   => undef,
     nodemanager_secure_listener           => true,
     jsse_enabled                          => $jsse_enabled,
     custom_trust                          => $custom_trust,
@@ -152,20 +153,34 @@ class profile::weblogic::domainadmin (
     sleep                                 => 20,
     tag                                   => $wls_domain,
     require                               => Wls_setting['default'],
+    notify                                => Weblogic::Control["startWLS${adminserver_name}"],
   }
 
   #Weblogic::Domain <<| tag == $wls_domain |>>
 
   #Replaces weblogic::services::startwls
   weblogic::control { "startWLS${adminserver_name}":
-    domain_name      => $wls_domain,
-    server_type      => 'admin',
-    target           => 'Cluster',
-    server           => $adminserver_name,
-    action           => 'start',
-    adminserver_port => $adminserver_port,
-    log_output       => $log_output,
-    require          => Wls_setting['default'],
+    domain_name         => $wls_domain,
+    server_type         => 'admin',
+    target              => 'Server',
+    server              => $adminserver_name,
+    action              => 'start',
+    adminserver_address => $adminserver_address,
+    nodemanager_port    => $nodemanager_port,
+    adminserver_port    => $adminserver_port,
+    log_output          => $log_output,
+    download_dir        => $download_dir,
+    require             => Wls_setting['default'],
+    before              => Class['profile::weblogic::ordering::security'],
+  }
+
+  #Replace weblogic::services::security
+  class { 'profile::weblogic::ordering::security':
+    security_default_params => {
+    },
+    user_instances          => $user_instances,
+    group_instances         => $group_instances,
+    authentication_provider => $authentication_provider,
   }
 
   weblogic::packdomain { $wls_domain:
@@ -188,19 +203,10 @@ class profile::weblogic::domainadmin (
     userconfig_instances => $userconfig_instances,
   }
 
-  #Replace weblogic::services::security
-  class { 'profile::weblogic::ordering::security':
-    security_default_params => {
-      require               => Class['profile::weblogic::ordering::userconfig'],
-    },
-    user_instances          => $user_instances,
-    group_instances         => $group_instances,
-    authentication_provider => $authentication_provider,
-  }
-
   class { 'profile::weblogic::ordering::basic_config':
     basic_config_default_params => {
-      require                   => Class['profile::weblogic::ordering::security'],
+      require                   => Class['profile::weblogic::ordering::userconfig'],
+      before                    => Anchor['profile::weblogic::domainadmin::end'],
     },
     wls_domain_instances             => $wls_domain_instances,
     wls_adminserver_instances_domain => $wls_adminserver_instances_domain,
@@ -213,15 +219,20 @@ class profile::weblogic::domainadmin (
     mail_session_instances           => $mail_session_instances,
   }
 
+#  Wls_server <<| tag == $wls_domain |>>
+#
+#  Wls_machine <<| tag == $wls_domain |>>
+
   anchor { 'profile::weblogic::domainadmin::end':
     require => [ Anchor['profile::weblogic::domainadmin::begin'], Weblogic::Packdomain[$wls_domain], ],
   }
 
   Class['profile::weblogic::base'] ->
   Weblogic::Domain[$wls_domain] ->
+  Class['profile::weblogic::ordering::security'] ->
   Weblogic::Packdomain[$wls_domain] ->
   Class['profile::weblogic::ordering::userconfig'] ->
-  Class['profile::weblogic::ordering::security'] ->
   Class['profile::weblogic::ordering::basic_config'] ->
   Anchor['profile::weblogic::domainadmin::end']
+  
 }

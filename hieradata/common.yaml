@@ -11,14 +11,13 @@ dft_wls_weblogic_home_dir:                  "%{hiera('dft_wls_middleware_home_di
 dft_wls_domains_path:                       "%{hiera('dft_wls_middleware_home_dir')}/user_projects/domains"
 dft_wls_log_output:                         'true'
 dft_wls_log_dir:                            "/opt/log/weblogic"
-
-#profile::weblogic::os_user:                  "%{hiera('dft_wls_os_user')}"
-#profile::weblogic::os_user_home:             "/home/%{hiera('dft_wls_os_user')}"
+dft_domain_nodemanager_port:                '5556'
 
 wls_weblogic_home_dir:                       "%{hiera('dft_wls_weblogic_home_dir')}"
 wls_middleware_home_dir:                     "%{hiera('dft_wls_middleware_home_dir')}"
 wls_download_dir:                             '/tmp/oracle'
 wls_domains_dir:                              "%{domains_dir}"
+domain_nodemanager_port:                      '5556'
 
 # this will use default as profile::weblogic::setting identifier
 authentication_provider_instances:
@@ -31,28 +30,7 @@ authentication_provider_instances:
     attributes:         'DigestReplayDetectionEnabled;UseDefaultUserNameMapper;DefaultUserNameMapperAttributeType;ActiveTypes'
     attributesvalues:   '1;1;CN;AuthenticatedUser::X.509'
 
-#adminserver_address:    "centos6a.lfg.puppetlabs.demo"
-#node1_address:          "172.22.5.10"
-#node2_address:          "172.22.5.11"
-
-#domain_adminserver_address: "%{hiera('adminserver_address')}"
 domain_adminserver_port:    "7001"
-#domain_node1_address:       "%{hiera('node1_address')}"
-#domain_node2_address:       "%{hiera('node2_address')}"
-
-#hosts:
-#  'localhost':
-#    ip:                "127.0.0.1"
-#    host_aliases:      'localhost.localdomain,localhost4,localhost4.localdomain4'
-#  'centos6a.lfg.puppetlabs.demo':
-#    ip:                "%{hiera('adminserver_address')}"
-#    host_aliases:      'admin'
-#  'node1.puppetlabs.vm':
-#    ip:                "%{hiera('node1_address')}"
-#    host_aliases:      'node1'
-#  'node2.puppetlabs.vm':
-#    ip:                "%{hiera('node2_address')}"
-#    host_aliases:      'node2'
 
 wls_jdk_home_dir:                        '/usr/java/latest'
 

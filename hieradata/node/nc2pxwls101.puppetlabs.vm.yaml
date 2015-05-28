@@ -1,0 +1,11 @@
+---
+wls_cluster_title:  'WebCluster'
+
+control_instances:
+  'startManagedNode':
+     target:                      'Cluster'
+     server:                      "%{hiera('wls_cluster_title')}"
+     action:                      'start'
+     domain_name:                 "%{hiera('wls_domain')}"
+     server_type:                 'managed'
+     log_output:                  "%{hiera('logoutput')}"
