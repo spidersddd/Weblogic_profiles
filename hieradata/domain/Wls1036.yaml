@@ -318,7 +318,7 @@ machines_instances:
     listenport:     '5556'
     machinetype:    'UnixMachine'
     nmtype:         'SSL'
-  'nc2pxwls100':
+  'nc2pxwls101':
     ensure:         'present'
     listenaddress:  *domain_node2_address
     listenport:     '5556'
@@ -460,7 +460,7 @@ server_instances:
     log_number_of_files_limited:           '1'
     log_rotate_logon_startup:              '1'
     log_rotationtype:                      'bySize'
-    machine:                               'nc2pxwls100'
+    machine:                               'nc2pxwls101'
     sslenabled:                            '1'
     ssllistenport:                         '8201'
     sslhostnameverificationignored:        '1'
@@ -476,19 +476,19 @@ server_instances:
     max_message_size:                      '25000000'
     # require:
     #   - Wls_machine[Node2]
-  'Wls11gSetting/wlsServer1':
-    ensure:                                'present'
-    arguments:                             "-XX:PermSize=256m -XX:MaxPermSize=256m -Xms752m -Xmx752m -Dweblogic.Stdout=%{hiera('log_dir')}/wlsServer1.out -Dweblogic.Stderr=%{hiera('log_dir')}/wlsServer1_err.out"
-    listenaddress:                         *domain_node1_address
-    listenport:                            '8005'
-    logfilename:                           "%{hiera('log_dir')}/wlsServer1_dm2.log"
-    log_datasource_filename:               "%{hiera('log_dir')}/wlsServer1_dm2_datasource.log"
-    log_http_filename:                     "%{hiera('log_dir')}/wlsServer1_dm2_access.log"
-    machine:                               'nc2pxwls100'
-    sslenabled:                            '1'
-    ssllistenport:                         '8205'
-    sslhostnameverificationignored:        '1'
-    jsseenabled:                           '1'
+#  'Wls11gSetting/wlsServer1':
+#    ensure:                                'present'
+#    arguments:                             "-XX:PermSize=256m -XX:MaxPermSize=256m -Xms752m -Xmx752m -Dweblogic.Stdout=%{hiera('log_dir')}/wlsServer1.out -Dweblogic.Stderr=%{hiera('log_dir')}/wlsServer1_err.out"
+#    listenaddress:                         *domain_node1_address
+#    listenport:                            '8005'
+#    logfilename:                           "%{hiera('log_dir')}/wlsServer1_dm2.log"
+#    log_datasource_filename:               "%{hiera('log_dir')}/wlsServer1_dm2_datasource.log"
+#    log_http_filename:                     "%{hiera('log_dir')}/wlsServer1_dm2_access.log"
+#    machine:                               'nc2pxwls100'
+#    sslenabled:                            '1'
+#    ssllistenport:                         '8205'
+#    sslhostnameverificationignored:        '1'
+#    jsseenabled:                           '1'
  #   custom_identity:                       '1'
  #   custom_identity_keystore_filename:     '/vagrant/identity_node1.jks'
  #   custom_identity_keystore_passphrase:   'welcome'
