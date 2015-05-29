@@ -36,6 +36,8 @@ class profile::weblogic::nodemanager2 (
   $custom_identity_alias                 = $profile::weblogic::params::custom_identity_alias,
   $custom_identity_privatekey_passphrase = $profile::weblogic::params::custom_identity_privatekey_passphrase,
   $create_rcu                            = $profile::weblogic::params::create_rcu,
+  $user_config_file                      = $profile::weblogic::params::user_config_file,
+  $user_key_file                         = $profile::weblogic::params::user_key_file,
   $file_domain_libs                      = hiera('file_domain_libs', {}),
   $fmw_plugins                           = hiera_hash('fmw_installations', {}),
   $opatch                                = hiera_hash('profile::weblogic::base::opatch', {}),
@@ -72,18 +74,18 @@ class profile::weblogic::nodemanager2 (
     domain_name         => $wls_domain,
     adminserver_address => $adminserver_address,
     adminserver_port    => $adminserver_port,
-    weblogic_user       => $weblogic_user,
-    weblogic_password   => $weblogic_password,
+    #  weblogic_user       => $weblogic_user,
+    #  weblogic_password   => $weblogic_password,
     os_user             => $wls_os_user,
     os_group            => $wls_os_group,
     download_dir        => $download_dir,
     log_dir             => $log_dir,
     log_output          => $log_output,
-    #userConfigFile     =>
-    #userKeyFile
+    userConfigFile      => $user_config_file,
+    userKeyFile         => $user_key_file,
     require             => Class['profile::weblogic::base'],
   }
-
+  
   # wls_setting { 'default':
   #  user              => $wls_os_user,
   #  weblogic_home_dir => $weblogic_home_dir,
@@ -179,6 +181,14 @@ class profile::weblogic::nodemanager2 (
   #  log_output       => $log_output,
   #  require          => Wls_setting['default'],
   #}
+
+  #Replace weblogic::services::userconfig
+  class { 'profile::weblogic::ordering::userconfig':
+    userconfig_default_params => {
+      before => [ Weblogic::Copydomain[$wls_domain], ],
+    },
+    userconfig_instances => $userconfig_instances,
+  }
 
 
   create_resources('weblogic::control',$control_instances, $start_default_params)

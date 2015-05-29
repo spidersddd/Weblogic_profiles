@@ -1,8 +1,5 @@
 class profile::weblogic::params {
 
-  #$domains_dir              = hiera('profile::weblogic::domains_dir', undef)
-  #$oracle_home_dir          = hiera('profile::weblogic::oracle_base_home_dir', '/opt/was/oracle/Oracle')
-  #$source                   = hiera('profile::weblogic::source', undef)
   $wls_domain                            = "${::wls_domain}"
   $jdk_home_dir                          = hiera('profile::weblogic::jdk_home_dir', '/usr/java/latest')
   $download_dir                          = hiera('download_dir', '/tmp/oracle')
@@ -18,9 +15,8 @@ class profile::weblogic::params {
   $wls_weblogic_home_dir                 = hiera('wls_weblogic_home_dir', "${wls_middleware_home_dir}/wlserver")
   $wls_domains_path                      = hiera('domains_dir', "${wls_middleware_home_dir}/user_projects/domains")
   $apps_dir                              = hiera('wls_apps_dir', "${wls_middleware_home_dir}/user_projects/applications")
-  $wls_log_output                        = true
+  $wls_log_output                        = hiera('log_outpu', true)
   $wls_log_dir                           = '/opt/log/weblogic'
-  $source                                = hiera('source', '/vagrant/oracle')
   $adminserver_name                      = hiera('adminserver_name', 'AdminServer')
   $development_mode                      = hiera('wls_development_mode', true)
   $adminserver_address                   = hiera('adminserver_address')
@@ -40,16 +36,23 @@ class profile::weblogic::params {
   $custom_identity_alias                 = "${::hostname}"
   $custom_identity_privatekey_passphrase = hiera('custom_identity_privatekey_passphrase', 'welcome')
   $create_rcu                            = hiera('create_rcu', false)
+  $user_config_file                      = hiera('domain_user_config_file', "/home/webadmin/wls-Wls1036-WebLogicConfig.properties")
+  $user_key_file                         = hiera('domain_user_key_file', "/home/webadmin/wls-Wls1036-WebLogicKey.properties")
 
   case $::osfamily {
     'RedHat': {
       $wls_filename             = hiera('wls_filename', 'wls1036_generic.jar')
+      $source                   = hiera('source', '/vagrant/oracle')
+    }
+    'AIX': {
+      $wls_filename             = hiera('wls_filename', 'wls1036_generic.jar')
+      $source                   = hiera('source', '/vagrant/oracle')
     }
     default: {
       fail "Operating System family ${::osfamily} not supported"
     }
   }
-  case $::lfg_sysrole {
+  case $::lfg_sysrole { 
     'wlsmgr': {
       $wls_role = hiera('wls_role', 'domainadmin')
     }
