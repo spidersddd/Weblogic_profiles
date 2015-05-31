@@ -1,0 +1,14 @@
+---
+# We want to use the YAML backend
+:backends:
+  - yaml
+
+:hierarchy:
+  - "node/%{clientcert}"
+  - "app_tier/%{application_tier}"
+  - "domain/%{wls_domain}"
+  - "environment/%{environment}"
+  - common
+
+:yaml:
+  :datadir: "/etc/puppetlabs/puppet/environments/%{environment}/hieradata"

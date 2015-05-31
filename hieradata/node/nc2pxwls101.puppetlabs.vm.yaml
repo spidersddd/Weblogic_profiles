@@ -1,11 +1,23 @@
 ---
+# This is setup for testing startups and configurations of jvm managed nodes.
+#
 wls_cluster_title:  'WebCluster'
 
 control_instances:
-  'startManagedNode':
+  'startwlsServer1':
      target:                      'Cluster'
      server:                      "%{hiera('wls_cluster_title')}"
      action:                      'start'
      domain_name:                 "%{hiera('wls_domain')}"
      server_type:                 'managed'
      log_output:                  "%{hiera('logoutput')}"
+     weblogic_home_dir:           "%{hiera('wls_weblogic_home_dir')}"
+     jdk_home_dir:                "/usr/java/latest"
+     os_user:                     "%{hiera('wls_os_user')}"
+     os_group:                    "%{hiera('wsl_os_group')}"
+     adminserver_address:         "%{hiera('adminserver_address')}"
+     adminserver_port:            "%{hiera('adminserver_port')}"
+     weblogic_user:               "%{hiera('wls_weblogic_user')}"
+     weblogic_password:           "%{hiera('domain_wls_password')}"
+     log_output:                  "%{hiera('log_output')}"
+

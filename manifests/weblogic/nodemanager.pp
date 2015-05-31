@@ -1,4 +1,4 @@
-class profile::weblogic::nodemanager2 (
+class profile::weblogic::nodemanager (
 
   $wls_filename                          = $profile::weblogic::params::wls_filename,
   $wls_version                           = $profile::weblogic::params::wls_version,

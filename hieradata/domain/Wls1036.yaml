@@ -28,7 +28,7 @@ domain_user_config_file:    "/home/webadmin/wls-Wls1036-WebLogicConfig.propertie
 domain_user_key_file:       "/home/webadmin/wls-Wls1036-WebLogicKey.properties"
 
 # used by nodemanager, control and domain creation
-wls_custom_trust:                  &wls_custom_trust              false
+wls_custom_trust:                  &wls_custom_trust              true
 wls_trust_keystore_file:           &wls_trust_keystore_file       '/vagrant/truststore.jks'
 wls_trust_keystore_passphrase:     &wls_trust_keystore_passphrase 'welcome'
 
@@ -436,6 +436,7 @@ server_instances:
  #   trust_keystore_file:                   *wls_trust_keystore_file
  #   trust_keystore_passphrase:             *wls_trust_keystore_passphrase
     max_message_size:                      '25000000'
+    notify:                                Wls_adminserver[AdminServer_Wls1036]
     # require:
     #   - Wls_machine[Node1]
   'wlsServer2':
@@ -474,6 +475,7 @@ server_instances:
  #   trust_keystore_file:                   *wls_trust_keystore_file
  #   trust_keystore_passphrase:             *wls_trust_keystore_passphrase
     max_message_size:                      '25000000'
+    notify:                                Wls_adminserver[AdminServer_Wls1036]
     # require:
     #   - Wls_machine[Node2]
 #  'Wls11gSetting/wlsServer1':
